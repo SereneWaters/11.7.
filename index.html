@@ -143,11 +143,17 @@
             padding: 20px;
         }
         .modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; }
+
+        /* Celebration Screen Layout */
+        .victory-title { font-size: 2rem; color: #f59e0b; text-align: center; margin-bottom: 10px; }
+        .victory-reward { font-size: 1.2rem; background: rgba(99,102,241,0.2); padding: 12px; border-radius: 8px; text-align: center; border: 1px dashed var(--primary); margin: 15px 0; }
+        canvas#celebrationCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
     </style>
 </head>
 <body>
 
     <div class="status-bar" id="storageLock">Securing App Engine...</div>
+    <canvas id="celebrationCanvas"></canvas>
 
     <!-- 1. GOALS SECTION -->
     <div class="section">
@@ -202,7 +208,7 @@
     <!-- MODAL: REWARD CREATION / EDITING -->
     <div class="modal" id="rewardModal">
         <div class="modal-content">
-            <h3 id="rewardModalTitle">Create Reward</h3>
+            <h3>Create Reward</h3>
             <input type="hidden" id="editRewardId" value="">
             
             <label>Reward Name</label>
@@ -230,6 +236,17 @@
         </div>
     </div>
 
+    <!-- MODAL: CELEBRATION POPUP -->
+    <div class="modal" id="celebrationModal" style="z-index: 1000;">
+        <div class="modal-content" style="text-align: center; border: 2px solid #f59e0b;">
+            <div class="victory-title">🎉 GOAL ACHIEVED! 🎉</div>
+            <p id="celebrationGoalText" style="font-size: 1.1rem; font-weight: bold; margin: 10px 0;"></p>
+            <div id="celebrationRewardBox" class="victory-reward"></div>
+            <p style="color: var(--muted); font-size: 0.9rem;">Your reward has been added to your Unlocked Rewards list!</p>
+            <button onclick="closeModal('celebrationModal')" style="background: var(--success); margin-top: 10px;">Awesome!</button>
+        </div>
+    </div>
+
 <script>
     let db;
     let currentNavDate = new Date();
@@ -254,6 +271,8 @@
                 document.getElementById('storageLock').innerText = granted ? "🔒 Permanent Storage Engaged" : "⚠️ Device Storage Management Active";
             });
         }
+        setupCanvasSize();
+        window.addEventListener('resize', setupCanvasSize);
         renderAll();
     }
 
@@ -261,26 +280,6 @@
         renderGoals();
         renderRewardsPool();
         renderCalendar();
-    }
-
-    // Modal Mechanics
-    function openGoalModal() {
-        document.getElementById('goalModalTitle').innerText = "Create New Goal";
-        document.getElementById('saveGoalBtn').innerText = "Create Goal";
-        document.getElementById('editGoalId').value = "";
-        document.getElementById('goalTitle').value = "";
-        document.getElementById('goalDays').value = "7";
-        populateRewardDropdown(null);
-        document.getElementById('goalModal').style.display = 'flex';
-    }
-
-    function openRewardModal() { 
-        document.getElementById('rewardModalTitle').innerText = "Create Reward";
-        document.getElementById('saveRewardBtn').innerText = "Save to Pool";
-        document.getElementById('editRewardId').value = "";
-        document.getElementById('rewardName').value = "";
-        document.getElementById('rewardPriority').value = "medium";
-        document.getElementById('rewardModal').style.display = 'flex'; 
     }
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -316,11 +315,9 @@
         db.transaction("rewards", "readonly").objectStore("rewards").get(id).onsuccess = (e) => {
             const r = e.target.result;
             if (!r) return;
-            document.getElementById('rewardModalTitle').innerText = "Edit Reward";
-            document.getElementById('saveRewardBtn').innerText = "Update Reward";
-            document.getElementById('editRewardId').value = r.id;
             document.getElementById('rewardName').value = r.name;
             document.getElementById('rewardPriority').value = r.priority;
+            document.getElementById('editRewardId').value = r.id;
             document.getElementById('rewardModal').style.display = 'flex';
         };
     }
@@ -375,7 +372,6 @@
         }
     }
 
-    // Removing reward entirely when tapped from the shopping list
     function claimReward(id) {
         let tx = db.transaction("rewards", "readwrite");
         tx.objectStore("rewards").delete(id);
@@ -413,15 +409,23 @@
                 store.put(data);
             };
         } else {
-            store.add({
-                title, days, streak: 0, rewardId: rewardId ? parseInt(rewardId) : null
-            });
+            store.add({ title, days, streak: 0, rewardId: rewardId ? parseInt(rewardId) : null });
         }
 
         tx.oncomplete = () => {
             closeModal('goalModal');
             renderAll();
         };
+    }
+
+    function openGoalModal() {
+        document.getElementById('goalModalTitle').innerText = "Create New Goal";
+        document.getElementById('saveGoalBtn').innerText = "Create Goal";
+        document.getElementById('editGoalId').value = "";
+        document.getElementById('goalTitle').value = "";
+        document.getElementById('goalDays').value = "7";
+        populateRewardDropdown(null);
+        document.getElementById('goalModal').style.display = 'flex';
     }
 
     function openEditGoal(id) {
@@ -598,6 +602,7 @@
                 if(latestStatus === 'success') {
                     goal.streak += 1;
                     if(goal.streak >= goal.days) {
+                        triggerCelebration(goal);
                         if(goal.rewardId) {
                             rewardStore.get(goal.rewardId).onsuccess = (re) => {
                                 let rew = re.target.result;
@@ -621,6 +626,102 @@
         tx.oncomplete = () => {
             renderAll();
         };
+    }
+
+    // --- CELEBRATION MODAL & CANVAS ANIMATION ---
+    function triggerCelebration(goal) {
+        document.getElementById('celebrationGoalText').innerText = `"${goal.title}"`;
+        const rewardBox = document.getElementById('celebrationRewardBox');
+        
+        if (goal.rewardId) {
+            db.transaction("rewards", "readonly").objectStore("rewards").get(goal.rewardId).onsuccess = (e) => {
+                const r = e.target.result;
+                rewardBox.style.display = 'block';
+                rewardBox.innerHTML = r ? `🎁 UNLOCKED: <strong>${r.name}</strong>` : `🎁 Reward item retrieved!`;
+            };
+        } else {
+            rewardBox.style.display = 'none';
+        }
+
+        document.getElementById('celebrationModal').style.display = 'flex';
+        startFireworks();
+    }
+
+    // Pure Canvas Firework Engine (Lightweight for Mobile)
+    const canvas = document.getElementById('celebrationCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function setupCanvasSize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function startFireworks() {
+        particles = [];
+        // Spawn multiple firework cluster origins
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                spawnFireworkCluster(Math.random() * canvas.width, canvas.height * 0.3 + Math.random() * (canvas.height * 0.4));
+            }, i * 350);
+        }
+        requestAnimationFrame(animateFireworks);
+    }
+
+    function spawnFireworkCluster(x, y) {
+        const colors = ['#6366f1', '#22c55e', '#ef4444', '#f59e0b', '#3b82f6', '#ec4899', '#a855f7'];
+        const baseColor = colors[Math.floor(Math.random() * colors.length)];
+        for (let i = 0; i < 40; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 2;
+            particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                alpha: 1,
+                decay: Math.random() * 0.015 + 0.01,
+                color: baseColor
+            });
+        }
+    }
+
+    function animateFireworks() {
+        if (document.getElementById('celebrationModal').style.display === 'none' && particles.length === 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.06; // add slight weight gravity simulation
+            p.alpha -= p.decay;
+
+            if (p.alpha <= 0) {
+                particles.splice(i, 1);
+            } else {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Keep running loop if window is up or items remain
+        if (document.getElementById('celebrationModal').style.display === 'flex' || particles.length > 0) {
+            // Continually drop light ambient confetti sparkles if victory window is open
+            if(document.getElementById('celebrationModal').style.display === 'flex' && Math.random() < 0.1) {
+                spawnFireworkCluster(Math.random() * canvas.width, Math.random() * canvas.height * 0.7);
+            }
+            requestAnimationFrame(animateFireworks);
+        }
     }
 </script>
 </body>
