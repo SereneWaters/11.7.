@@ -60,12 +60,15 @@
             font-size: 0.95rem;
         }
         button.secondary { background: #334155; margin-top: 4px;}
-        button.danger-btn { background: var(--danger); width: auto; padding: 6px 10px; font-size: 0.8rem;}
+        button.action-btn { width: auto; padding: 6px 10px; font-size: 0.8rem; font-weight: normal; margin-left: 4px; }
+        button.edit-btn { background: #475569; }
+        button.danger-btn { background: var(--danger); }
         button.claim-btn { background: var(--success); width: auto; padding: 8px 14px; font-size: 0.9rem;}
 
         /* Flex helpers */
         .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .button-group { display: flex; gap: 6px; }
 
         /* Items Lists */
         .item-card {
@@ -96,6 +99,7 @@
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         /* Calendar Styling */
@@ -149,7 +153,7 @@
     <div class="section">
         <h2>🎯 Active Goals</h2>
         <div id="goalsContainer"></div>
-        <button onclick="openGoalModal()" style="margin-top:12px;">+ Create New Goal</button>
+        <button onclick="openGoalModal()">+ Create New Goal</button>
     </div>
 
     <!-- 4. CALENDAR SECTION -->
@@ -172,31 +176,35 @@
     <div class="section">
         <h2>💎 Reward List Pool</h2>
         <div id="rewardsContainer"></div>
-        <button onclick="openRewardModal()" style="margin-top:12px;">+ Create New Reward Pool Item</button>
+        <button onclick="openRewardModal()">+ Create New Reward Pool Item</button>
     </div>
 
-    <!-- MODAL: GOAL CREATION -->
+    <!-- MODAL: GOAL CREATION / EDITING -->
     <div class="modal" id="goalModal">
         <div class="modal-content">
-            <h3>Create New Goal</h3>
+            <h3 id="goalModalTitle">Create New Goal</h3>
+            <input type="hidden" id="editGoalId" value="">
+            
             <label>Goal Title (e.g., 10k Steps Daily)</label>
             <input type="text" id="goalTitle" placeholder="Walk 10k steps">
             
             <label>Duration Target (Days in a row)</label>
             <input type="number" id="goalDays" value="7" min="1">
             
-            <label>Link Reward (Optional)</label>
+            <label>Link Reward</label>
             <select id="goalRewardSelect"><option value="">No Reward Assigned Yet</option></select>
             
-            <button onclick="saveGoal()">Create Goal</button>
+            <button id="saveGoalBtn" onclick="saveGoal()">Create Goal</button>
             <button class="secondary" onclick="closeModal('goalModal')">Cancel</button>
         </div>
     </div>
 
-    <!-- MODAL: REWARD CREATION -->
+    <!-- MODAL: REWARD CREATION / EDITING -->
     <div class="modal" id="rewardModal">
         <div class="modal-content">
-            <h3>Create Reward</h3>
+            <h3 id="rewardModalTitle">Create Reward</h3>
+            <input type="hidden" id="editRewardId" value="">
+            
             <label>Reward Name</label>
             <input type="text" id="rewardName" placeholder="Cheat Meal, New Game, Sleep In">
             
@@ -207,7 +215,7 @@
                 <option value="high">High Priority (Red)</option>
             </select>
             
-            <button onclick="saveReward()">Save to Pool</button>
+            <button id="saveRewardBtn" onclick="saveReward()">Save to Pool</button>
             <button class="secondary" onclick="closeModal('rewardModal')">Cancel</button>
         </div>
     </div>
@@ -257,24 +265,63 @@
 
     // Modal Mechanics
     function openGoalModal() {
-        populateRewardDropdown();
+        document.getElementById('goalModalTitle').innerText = "Create New Goal";
+        document.getElementById('saveGoalBtn').innerText = "Create Goal";
+        document.getElementById('editGoalId').value = "";
+        document.getElementById('goalTitle').value = "";
+        document.getElementById('goalDays').value = "7";
+        populateRewardDropdown(null);
         document.getElementById('goalModal').style.display = 'flex';
     }
-    function openRewardModal() { document.getElementById('rewardModal').style.display = 'flex'; }
+
+    function openRewardModal() { 
+        document.getElementById('rewardModalTitle').innerText = "Create Reward";
+        document.getElementById('saveRewardBtn').innerText = "Save to Pool";
+        document.getElementById('editRewardId').value = "";
+        document.getElementById('rewardName').value = "";
+        document.getElementById('rewardPriority').value = "medium";
+        document.getElementById('rewardModal').style.display = 'flex'; 
+    }
+
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // --- REWARDS LOGIC ---
     function saveReward() {
         const name = document.getElementById('rewardName').value.trim();
         const priority = document.getElementById('rewardPriority').value;
+        const editId = document.getElementById('editRewardId').value;
         if (!name) return;
 
         let tx = db.transaction("rewards", "readwrite");
-        tx.objectStore("rewards").add({ name, priority, status: "pool" });
+        let store = tx.objectStore("rewards");
+
+        if (editId) {
+            store.get(parseInt(editId)).onsuccess = (e) => {
+                let data = e.target.result;
+                data.name = name;
+                data.priority = priority;
+                store.put(data);
+            };
+        } else {
+            store.add({ name, priority, status: "pool" });
+        }
+
         tx.oncomplete = () => {
             closeModal('rewardModal');
-            document.getElementById('rewardName').value = '';
             renderAll();
+        };
+    }
+
+    function openEditReward(id) {
+        db.transaction("rewards", "readonly").objectStore("rewards").get(id).onsuccess = (e) => {
+            const r = e.target.result;
+            if (!r) return;
+            document.getElementById('rewardModalTitle').innerText = "Edit Reward";
+            document.getElementById('saveRewardBtn').innerText = "Update Reward";
+            document.getElementById('editRewardId').value = r.id;
+            document.getElementById('rewardName').value = r.name;
+            document.getElementById('rewardPriority').value = r.priority;
+            document.getElementById('rewardModal').style.display = 'flex';
         };
     }
 
@@ -289,18 +336,30 @@
             list.forEach(r => {
                 const card = document.createElement('div');
                 card.className = "item-card flex-between";
-                card.innerHTML = `
-                    <div>
-                        <strong>${r.name}</strong><br>
-                        <span class="reward-tag priority-${r.priority}">${r.priority.toUpperCase()}</span>
-                    </div>
-                    <div>
-                        ${r.status === 'unlocked' ? `<button class="claim-btn" onclick="claimReward(${r.id})">Claim</button>` : `<button class="danger-btn" onclick="deleteReward(${r.id})">Delete</button>`}
-                    </div>
-                `;
+                
                 if(r.status === 'unlocked') {
+                    card.innerHTML = `
+                        <div>
+                            <strong>${r.name}</strong><br>
+                            <span class="reward-tag priority-${r.priority}">${r.priority.toUpperCase()}</span>
+                        </div>
+                        <div class="button-group">
+                            <button class="action-btn edit-btn" onclick="openEditReward(${r.id})">Edit</button>
+                            <button class="claim-btn" onclick="claimReward(${r.id})">Claim</button>
+                        </div>
+                    `;
                     unlockedContainer.appendChild(card);
                 } else {
+                    card.innerHTML = `
+                        <div>
+                            <strong>${r.name}</strong><br>
+                            <span class="reward-tag priority-${r.priority}">${r.priority.toUpperCase()}</span>
+                        </div>
+                        <div class="button-group">
+                            <button class="action-btn edit-btn" onclick="openEditReward(${r.id})">Edit</button>
+                            <button class="action-btn danger-btn" onclick="deleteReward(${r.id})">Delete</button>
+                        </div>
+                    `;
                     container.appendChild(card);
                 }
             });
@@ -316,18 +375,20 @@
         }
     }
 
+    // Removing reward entirely when tapped from the shopping list
     function claimReward(id) {
         let tx = db.transaction("rewards", "readwrite");
         tx.objectStore("rewards").delete(id);
         tx.oncomplete = () => renderAll();
     }
 
-    function populateRewardDropdown() {
+    function populateRewardDropdown(selectedRewardId) {
         const select = document.getElementById('goalRewardSelect');
         select.innerHTML = '<option value="">No Reward Assigned Yet</option>';
         db.transaction("rewards", "readonly").objectStore("rewards").getAll().onsuccess = (e) => {
-            e.target.result.filter(r => r.status === 'pool').forEach(r => {
-                select.innerHTML += `<option value="${r.id}">${r.name} (${r.priority})</option>`;
+            e.target.result.filter(r => r.status === 'pool' || r.id === selectedRewardId).forEach(r => {
+                const isSelected = r.id === selectedRewardId ? 'selected' : '';
+                select.innerHTML += `<option value="${r.id}" ${isSelected}>${r.name} (${r.priority})</option>`;
             });
         };
     }
@@ -337,16 +398,43 @@
         const title = document.getElementById('goalTitle').value.trim();
         const days = parseInt(document.getElementById('goalDays').value);
         const rewardId = document.getElementById('goalRewardSelect').value;
+        const editId = document.getElementById('editGoalId').value;
         if(!title || isNaN(days)) return;
 
         let tx = db.transaction("goals", "readwrite");
-        tx.objectStore("goals").add({
-            title, days, streak: 0, rewardId: rewardId ? parseInt(rewardId) : null
-        });
+        let store = tx.objectStore("goals");
+
+        if (editId) {
+            store.get(parseInt(editId)).onsuccess = (e) => {
+                let data = e.target.result;
+                data.title = title;
+                data.days = days;
+                data.rewardId = rewardId ? parseInt(rewardId) : null;
+                store.put(data);
+            };
+        } else {
+            store.add({
+                title, days, streak: 0, rewardId: rewardId ? parseInt(rewardId) : null
+            });
+        }
+
         tx.oncomplete = () => {
             closeModal('goalModal');
-            document.getElementById('goalTitle').value = '';
             renderAll();
+        };
+    }
+
+    function openEditGoal(id) {
+        db.transaction("goals", "readonly").objectStore("goals").get(id).onsuccess = (e) => {
+            const g = e.target.result;
+            if (!g) return;
+            document.getElementById('goalModalTitle').innerText = "Edit Active Goal";
+            document.getElementById('saveGoalBtn').innerText = "Update Goal";
+            document.getElementById('editGoalId').value = g.id;
+            document.getElementById('goalTitle').value = g.title;
+            document.getElementById('goalDays').value = g.days;
+            populateRewardDropdown(g.rewardId);
+            document.getElementById('goalModal').style.display = 'flex';
         };
     }
 
@@ -370,19 +458,24 @@
                     db.transaction("rewards", "readonly").objectStore("rewards").get(g.rewardId).onsuccess = (re) => {
                         if(re.target.result) {
                             document.getElementById(`rew-${g.id}`).innerHTML = `🎁 Reward: <strong>${re.target.result.name}</strong>`;
+                        } else {
+                            document.getElementById(`rew-${g.id}`).innerHTML = `<span style="color:var(--danger)">Linked reward missing!</span>`;
                         }
                     };
                     rewardHtml = `<span id="rew-${g.id}" style="font-size:0.8rem; color:var(--muted);">Loading reward...</span>`;
                 }
 
                 card.innerHTML = `
-                    <div>
+                    <div style="overflow: hidden; text-overflow: ellipsis;">
                         <strong style="font-size:1.1rem;">${g.title}</strong><br>
                         ${rewardHtml}
                     </div>
-                    <div class="flex-between">
+                    <div class="flex-between" style="flex-shrink: 0;">
                         <span class="streak-badge">${g.streak} / ${g.days} Days</span>
-                        <button class="danger-btn" onclick="deleteGoal(${g.id})">X</button>
+                        <div class="button-group">
+                            <button class="action-btn edit-btn" onclick="openEditGoal(${g.id})">Edit</button>
+                            <button class="action-btn danger-btn" onclick="deleteGoal(${g.id})">X</button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -424,7 +517,6 @@
             grid.innerHTML += `<div class="calendar-day empty"></div>`;
         }
 
-        // Fetch historical log mappings
         db.transaction("history", "readonly").objectStore("history").getAll().onsuccess = (event) => {
             const logs = event.target.result.reduce((acc, current) => {
                 acc[current.dateStr] = current.status; 
@@ -495,7 +587,6 @@
         };
     }
 
-    // Processing algorithm for automated streak counting & unlocks
     function recalculateStreaks(latestStatus) {
         let tx = db.transaction(["goals", "rewards"], "readwrite");
         let goalStore = tx.objectStore("goals");
@@ -507,7 +598,6 @@
                 if(latestStatus === 'success') {
                     goal.streak += 1;
                     if(goal.streak >= goal.days) {
-                        // Goal target met! Trigger asset unlock
                         if(goal.rewardId) {
                             rewardStore.get(goal.rewardId).onsuccess = (re) => {
                                 let rew = re.target.result;
@@ -517,12 +607,12 @@
                                 }
                             };
                         }
-                        goalStore.delete(goal.id); // Wipe completed goal automatically
+                        goalStore.delete(goal.id); 
                     } else {
                         goalStore.put(goal);
                     }
                 } else if(latestStatus === 'fail') {
-                    goal.streak = 0; // Broken streak reset mechanics
+                    goal.streak = 0; 
                     goalStore.put(goal);
                 }
             });
