@@ -14,6 +14,7 @@
             --primary: #6366f1;
             --success: #22c55e;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --low: #3b82f6;
             --medium: #f59e0b;
             --high: #ef4444;
@@ -102,6 +103,27 @@
             white-space: nowrap;
         }
 
+        /* Habit Row Inside Logger */
+        .habit-log-row {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .habit-toggle-btn {
+            width: auto;
+            padding: 8px 16px;
+            background: #334155;
+            font-size: 0.9rem;
+        }
+        .habit-toggle-btn.done {
+            background: var(--success);
+        }
+
         /* Calendar Styling */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .calendar-header button { width: auto; padding: 6px 12px; background: #334155; }
@@ -127,8 +149,11 @@
         }
         .calendar-day.today { border: 2px solid var(--primary); }
         .calendar-day.empty { background: transparent; cursor: default; }
-        .day-status-success { background-color: rgba(34, 197, 94, 0.25); border: 1px solid var(--success); }
-        .day-status-fail { background-color: rgba(239, 68, 68, 0.25); border: 1px solid var(--danger); }
+        
+        /* Dynamic Calendar Status Shades */
+        .day-all-success { background-color: rgba(34, 197, 94, 0.25); border: 1px solid var(--success); }
+        .day-some-success { background-color: rgba(245, 158, 11, 0.2); border: 1px solid var(--warning); }
+        .day-all-fail { background-color: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); }
         .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 2px; }
 
         /* Modal / Overlay for logging */
@@ -142,7 +167,7 @@
             align-items: center;
             padding: 20px;
         }
-        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; }
+        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
         /* Celebration Screen Layout */
         .victory-title { font-size: 2rem; color: #f59e0b; text-align: center; margin-bottom: 10px; }
@@ -226,13 +251,13 @@
         </div>
     </div>
 
-    <!-- MODAL: DAY LOGGER -->
+    <!-- MODAL: INDIVIDUAL DAY LOGGER -->
     <div class="modal" id="logModal">
         <div class="modal-content">
-            <h3 id="logModalTitle">Log Day Status</h3>
-            <p id="logModalDate" style="color: var(--muted);"></p>
+            <h3 id="logModalTitle">Log Habits</h3>
+            <p id="logModalDate" style="color: var(--muted); margin-bottom: 16px;"></p>
             <div id="logModalGoalsList"></div>
-            <button class="secondary" onclick="closeModal('logModal')" style="margin-top:12px;">Close</button>
+            <button class="secondary" onclick="closeModal('logModal')" style="margin-top:12px;">Done Tracking</button>
         </div>
     </div>
 
@@ -252,8 +277,8 @@
     let currentNavDate = new Date();
     let selectedLogDateStr = "";
 
-    // Open & Protect Database
-    const dbRequest = indexedDB.open("HabitRPGDatabase", 2);
+    // Open & Protect Database (Version 3 incorporates granular goal tracking)
+    const dbRequest = indexedDB.open("HabitRPGDatabase", 3);
     dbRequest.onupgradeneeded = (e) => {
         let database = e.target.result;
         if(!database.objectStoreNames.contains("goals")) database.createObjectStore("goals", { keyPath: "id", autoIncrement: true });
@@ -282,7 +307,10 @@
         renderCalendar();
     }
 
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function closeModal(id) { 
+        document.getElementById(id).style.display = 'none'; 
+        if(id === 'logModal') renderAll(); 
+    }
 
     // --- REWARDS LOGIC ---
     function saveReward() {
@@ -315,9 +343,9 @@
         db.transaction("rewards", "readonly").objectStore("rewards").get(id).onsuccess = (e) => {
             const r = e.target.result;
             if (!r) return;
+            document.getElementById('editRewardId').value = r.id;
             document.getElementById('rewardName').value = r.name;
             document.getElementById('rewardPriority').value = r.priority;
-            document.getElementById('editRewardId').value = r.id;
             document.getElementById('rewardModal').style.display = 'flex';
         };
     }
@@ -521,30 +549,45 @@
             grid.innerHTML += `<div class="calendar-day empty"></div>`;
         }
 
-        db.transaction("history", "readonly").objectStore("history").getAll().onsuccess = (event) => {
-            const logs = event.target.result.reduce((acc, current) => {
-                acc[current.dateStr] = current.status; 
+        // Get both history logs and goals to calculate dynamic day coloring shades
+        db.transaction(["history", "goals"], "readonly").objectStore("history").getAll().onsuccess = (event) => {
+            const historyList = event.target.result;
+            const logs = historyList.reduce((acc, current) => {
+                acc[current.dateStr] = current.completedIds || []; 
                 return acc;
             }, {});
 
-            const today = new Date();
-            const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+            db.transaction("goals", "readonly").objectStore("goals").getAll().onsuccess = (gEvent) => {
+                const totalActiveGoalsCount = gEvent.target.result.length;
 
-            for(let day=1; day<=totalDays; day++) {
-                const dateStr = `${year}-${month}-${day}`;
-                let statusClass = '';
-                if(logs[dateStr] === 'success') statusClass = 'day-status-success';
-                if(logs[dateStr] === 'fail') statusClass = 'day-status-fail';
+                const today = new Date();
+                const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
 
-                const isToday = todayStr === dateStr ? 'today' : '';
-                
-                grid.innerHTML += `
-                    <div class="calendar-day ${statusClass} ${isToday}" onclick="openDayLog('${dateStr}', ${day})">
-                        ${day}
-                        ${isToday ? '<div class="day-dot"></div>': ''}
-                    </div>
-                `;
-            }
+                for(let day=1; day<=totalDays; day++) {
+                    const dateStr = `${year}-${month}-${day}`;
+                    let statusClass = '';
+                    
+                    if (logs[dateStr] && logs[dateStr].length > 0) {
+                        // If everything active or more was checked, give it full success colors
+                        if (totalActiveGoalsCount > 0 && logs[dateStr].length >= totalActiveGoalsCount) {
+                            statusClass = 'day-all-success';
+                        } else {
+                            statusClass = 'day-some-success';
+                        }
+                    } else if (logs[dateStr] !== undefined) {
+                        statusClass = 'day-all-fail';
+                    }
+
+                    const isToday = todayStr === dateStr ? 'today' : '';
+                    
+                    grid.innerHTML += `
+                        <div class="calendar-day ${statusClass} ${isToday}" onclick="openDayLog('${dateStr}', ${day})">
+                            ${day}
+                            ${isToday ? '<div class="day-dot"></div>': ''}
+                        </div>
+                    `;
+                }
+            };
         };
     }
 
@@ -555,76 +598,94 @@
         const container = document.getElementById('logModalGoalsList');
         container.innerHTML = '';
 
-        db.transaction("history", "readonly").objectStore("history").get(dateStr).onsuccess = (e) => {
-            const existing = e.target.result;
-            const currentStatus = existing ? existing.status : 'none';
+        db.transaction(["history", "goals"], "readonly").objectStore("history").get(dateStr).onsuccess = (e) => {
+            const logEntry = e.target.result;
+            const completedIds = logEntry ? (logEntry.completedIds || []) : [];
 
-            container.innerHTML = `
-                <p>How did your habit execution go today overall?</p>
-                <div class="grid-2">
-                    <button style="background:var(--success)" onclick="submitDayStatus('success')">🎯 Succeeded</button>
-                    <button style="background:var(--danger)" onclick="submitDayStatus('fail')">❌ Failed</button>
-                </div>
-                ${currentStatus !== 'none' ? `<button class="secondary" onclick="submitDayStatus('clear')">Reset Entry Data</button>` : ''}
-            `;
-            document.getElementById('logModal').style.display = 'flex';
+            db.transaction("goals", "readonly").objectStore("goals").getAll().onsuccess = (ge) => {
+                const activeGoals = ge.target.result;
+                
+                if (activeGoals.length === 0) {
+                    container.innerHTML = `<p style="color:var(--muted); text-align:center;">No active goals created to log for this day.</p>`;
+                    document.getElementById('logModal').style.display = 'flex';
+                    return;
+                }
+
+                activeGoals.forEach(goal => {
+                    const isChecked = completedIds.includes(goal.id);
+                    const row = document.createElement('div');
+                    row.className = "habit-log-row";
+                    row.innerHTML = `
+                        <div><strong>${goal.title}</strong></div>
+                        <button class="habit-toggle-btn ${isChecked ? 'done' : ''}" id="toggle-${goal.id}" onclick="toggleHabitLog(${goal.id})">
+                            ${isChecked ? '✓ Completed' : '○ Mark Done'}
+                        </button>
+                    `;
+                    container.appendChild(row);
+                });
+
+                document.getElementById('logModal').style.display = 'flex';
+            };
         };
     }
 
-    function submitDayStatus(status) {
-        let historyTx = db.transaction("history", "readwrite");
-        let store = historyTx.objectStore("history");
+    function toggleHabitLog(goalId) {
+        const btn = document.getElementById(`toggle-${goalId}`);
+        const changingToChecked = !btn.classList.contains('done');
 
-        if (status === 'clear') {
-            store.delete(selectedLogDateStr);
-        } else {
-            store.put({ dateStr: selectedLogDateStr, status: status });
-        }
-
-        historyTx.oncomplete = () => {
-            closeModal('logModal');
-            if (status !== 'clear') {
-                recalculateStreaks(status);
-            } else {
-                renderAll();
-            }
-        };
-    }
-
-    function recalculateStreaks(latestStatus) {
-        let tx = db.transaction(["goals", "rewards"], "readwrite");
+        let tx = db.transaction(["history", "goals", "rewards"], "readwrite");
+        let historyStore = tx.objectStore("history");
         let goalStore = tx.objectStore("goals");
         let rewardStore = tx.objectStore("rewards");
 
-        goalStore.getAll().onsuccess = (e) => {
-            const goals = e.target.result;
-            goals.forEach(goal => {
-                if(latestStatus === 'success') {
-                    goal.streak += 1;
-                    if(goal.streak >= goal.days) {
-                        triggerCelebration(goal);
-                        if(goal.rewardId) {
-                            rewardStore.get(goal.rewardId).onsuccess = (re) => {
-                                let rew = re.target.result;
-                                if(rew) {
-                                    rew.status = 'unlocked';
-                                    rewardStore.put(rew);
-                                }
-                            };
+        historyStore.get(selectedLogDateStr).onsuccess = (e) => {
+            let log = e.target.result || { dateStr: selectedLogDateStr, completedIds: [] };
+            
+            if (changingToChecked) {
+                if (!log.completedIds.includes(goalId)) log.completedIds.push(goalId);
+                btn.classList.add('done');
+                btn.innerText = '✓ Completed';
+                
+                // Advance specific habit streak
+                goalStore.get(goalId).onsuccess = (ge) => {
+                    let goal = ge.target.result;
+                    if (goal) {
+                        goal.streak += 1;
+                        if (goal.streak >= goal.days) {
+                            triggerCelebration(goal);
+                            if (goal.rewardId) {
+                                rewardStore.get(goal.rewardId).onsuccess = (re) => {
+                                    let rew = re.target.result;
+                                    if(rew) {
+                                        rew.status = 'unlocked';
+                                        rewardStore.put(rew);
+                                    }
+                                };
+                            }
+                            goalStore.delete(goalId);
+                            // Remove from local list row view instantly
+                            btn.parentElement.style.opacity = '0.4';
+                            btn.disabled = true;
+                        } else {
+                            goalStore.put(goal);
                         }
-                        goalStore.delete(goal.id); 
-                    } else {
+                    }
+                };
+            } else {
+                log.completedIds = log.completedIds.filter(id => id !== goalId);
+                btn.classList.remove('done');
+                btn.innerText = '○ Mark Done';
+                
+                // Revert specific habit streak
+                goalStore.get(goalId).onsuccess = (ge) => {
+                    let goal = ge.target.result;
+                    if (goal && goal.streak > 0) {
+                        goal.streak -= 1;
                         goalStore.put(goal);
                     }
-                } else if(latestStatus === 'fail') {
-                    goal.streak = 0; 
-                    goalStore.put(goal);
-                }
-            });
-        };
-
-        tx.oncomplete = () => {
-            renderAll();
+                };
+            }
+            historyStore.put(log);
         };
     }
 
@@ -647,7 +708,7 @@
         startFireworks();
     }
 
-    // Pure Canvas Firework Engine (Lightweight for Mobile)
+    // Pure Canvas Firework Engine
     const canvas = document.getElementById('celebrationCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -659,7 +720,6 @@
 
     function startFireworks() {
         particles = [];
-        // Spawn multiple firework cluster origins
         for (let i = 0; i < 5; i++) {
             setTimeout(() => {
                 spawnFireworkCluster(Math.random() * canvas.width, canvas.height * 0.3 + Math.random() * (canvas.height * 0.4));
@@ -675,8 +735,7 @@
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 5 + 2;
             particles.push({
-                x: x,
-                y: y,
+                x: x, y: y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 alpha: 1,
@@ -698,7 +757,7 @@
             const p = particles[i];
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.06; // add slight weight gravity simulation
+            p.vy += 0.06;
             p.alpha -= p.decay;
 
             if (p.alpha <= 0) {
@@ -714,9 +773,7 @@
             }
         }
 
-        // Keep running loop if window is up or items remain
         if (document.getElementById('celebrationModal').style.display === 'flex' || particles.length > 0) {
-            // Continually drop light ambient confetti sparkles if victory window is open
             if(document.getElementById('celebrationModal').style.display === 'flex' && Math.random() < 0.1) {
                 spawnFireworkCluster(Math.random() * canvas.width, Math.random() * canvas.height * 0.7);
             }
