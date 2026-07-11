@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit RPG Tracker</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRfbmFtZSI6ICJIYWJpdFNoY29yZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3IiOiAiIzYzNjZmMSIKfQ==">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #6366f1;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --low: #3b82f6;
+            --medium: #f59e0b;
+            --high: #ef4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 12px;
+            padding-bottom: 60px;
+        }
+        h1, h2, h3 { margin-top: 0; color: #fff; }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .status-bar { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 12px; }
+        
+        /* Form Controls */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0 14px 0;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        button.secondary { background: #334155; margin-top: 4px;}
+        button.danger-btn { background: var(--danger); width: auto; padding: 6px 10px; font-size: 0.8rem;}
+        button.claim-btn { background: var(--success); width: auto; padding: 8px 14px; font-size: 0.9rem;}
+
+        /* Flex helpers */
+        .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* Items Lists */
+        .item-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            position: relative;
+        }
+        .goal-card { border-left: 4px solid var(--primary); }
+        .reward-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 4px;
+        }
+        .priority-low { background-color: var(--low); }
+        .priority-medium { background-color: var(--medium); }
+        .priority-high { background-color: var(--high); }
+        
+        .streak-badge {
+            background: #334155;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* Calendar Styling */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendar-header button { width: auto; padding: 6px 12px; background: #334155; }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+        .calendar-day-name { font-size: 0.75rem; color: var(--muted); font-weight: bold; padding-bottom: 4px; }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0f172a;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            position: relative;
+        }
+        .calendar-day.today { border: 2px solid var(--primary); }
+        .calendar-day.empty { background: transparent; cursor: default; }
+        .day-status-success { background-color: rgba(34, 197, 94, 0.25); border: 1px solid var(--success); }
+        .day-status-fail { background-color: rgba(239, 68, 68, 0.25); border: 1px solid var(--danger); }
+        .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 2px; }
+
+        /* Modal / Overlay for logging */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; }
+    </style>
+</head>
+<body>
+
+    <div class="status-bar" id="storageLock">Securing App Engine...</div>
+
+    <!-- 1. GOALS SECTION -->
+    <div class="section">
+        <h2>🎯 Active Goals</h2>
+        <div id="goalsContainer"></div>
+        <button onclick="openGoalModal()" style="margin-top:12px;">+ Create New Goal</button>
+    </div>
+
+    <!-- 4. CALENDAR SECTION -->
+    <div class="section">
+        <div class="calendar-header">
+            <button onclick="changeMonth(-1)">◀</button>
+            <h3 id="calendarMonthYear" style="margin:0;">Month Year</h3>
+            <button onclick="changeMonth(1)">▶</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- 3. UNLOCKED REWARDS (SHOPPING LIST) -->
+    <div class="section" style="border: 2px solid var(--success);">
+        <h2>🎁 Unlocked Rewards (Ready to Claim)</h2>
+        <div id="unlockedContainer"></div>
+    </div>
+
+    <!-- 2. REWARD VAULT -->
+    <div class="section">
+        <h2>💎 Reward List Pool</h2>
+        <div id="rewardsContainer"></div>
+        <button onclick="openRewardModal()" style="margin-top:12px;">+ Create New Reward Pool Item</button>
+    </div>
+
+    <!-- MODAL: GOAL CREATION -->
+    <div class="modal" id="goalModal">
+        <div class="modal-content">
+            <h3>Create New Goal</h3>
+            <label>Goal Title (e.g., 10k Steps Daily)</label>
+            <input type="text" id="goalTitle" placeholder="Walk 10k steps">
+            
+            <label>Duration Target (Days in a row)</label>
+            <input type="number" id="goalDays" value="7" min="1">
+            
+            <label>Link Reward (Optional)</label>
+            <select id="goalRewardSelect"><option value="">No Reward Assigned Yet</option></select>
+            
+            <button onclick="saveGoal()">Create Goal</button>
+            <button class="secondary" onclick="closeModal('goalModal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- MODAL: REWARD CREATION -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <h3>Create Reward</h3>
+            <label>Reward Name</label>
+            <input type="text" id="rewardName" placeholder="Cheat Meal, New Game, Sleep In">
+            
+            <label>Priority Color Focus</label>
+            <select id="rewardPriority">
+                <option value="low">Low Priority (Blue)</option>
+                <option value="medium" selected>Medium Priority (Orange)</option>
+                <option value="high">High Priority (Red)</option>
+            </select>
+            
+            <button onclick="saveReward()">Save to Pool</button>
+            <button class="secondary" onclick="closeModal('rewardModal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- MODAL: DAY LOGGER -->
+    <div class="modal" id="logModal">
+        <div class="modal-content">
+            <h3 id="logModalTitle">Log Day Status</h3>
+            <p id="logModalDate" style="color: var(--muted);"></p>
+            <div id="logModalGoalsList"></div>
+            <button class="secondary" onclick="closeModal('logModal')" style="margin-top:12px;">Close</button>
+        </div>
+    </div>
+
+<script>
+    let db;
+    let currentNavDate = new Date();
+    let selectedLogDateStr = "";
+
+    // Open & Protect Database
+    const dbRequest = indexedDB.open("HabitRPGDatabase", 2);
+    dbRequest.onupgradeneeded = (e) => {
+        let database = e.target.result;
+        if(!database.objectStoreNames.contains("goals")) database.createObjectStore("goals", { keyPath: "id", autoIncrement: true });
+        if(!database.objectStoreNames.contains("rewards")) database.createObjectStore("rewards", { keyPath: "id", autoIncrement: true });
+        if(!database.objectStoreNames.contains("history")) database.createObjectStore("history", { keyPath: "dateStr" }); 
+    };
+    dbRequest.onsuccess = (e) => {
+        db = e.target.result;
+        initApp();
+    };
+
+    function initApp() {
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(granted => {
+                document.getElementById('storageLock').innerText = granted ? "🔒 Permanent Storage Engaged" : "⚠️ Device Storage Management Active";
+            });
+        }
+        renderAll();
+    }
+
+    function renderAll() {
+        renderGoals();
+        renderRewardsPool();
+        renderCalendar();
+    }
+
+    // Modal Mechanics
+    function openGoalModal() {
+        populateRewardDropdown();
+        document.getElementById('goalModal').style.display = 'flex';
+    }
+    function openRewardModal() { document.getElementById('rewardModal').style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // --- REWARDS LOGIC ---
+    function saveReward() {
+        const name = document.getElementById('rewardName').value.trim();
+        const priority = document.getElementById('rewardPriority').value;
+        if (!name) return;
+
+        let tx = db.transaction("rewards", "readwrite");
+        tx.objectStore("rewards").add({ name, priority, status: "pool" });
+        tx.oncomplete = () => {
+            closeModal('rewardModal');
+            document.getElementById('rewardName').value = '';
+            renderAll();
+        };
+    }
+
+    function renderRewardsPool() {
+        const container = document.getElementById('rewardsContainer');
+        const unlockedContainer = document.getElementById('unlockedContainer');
+        container.innerHTML = '';
+        unlockedContainer.innerHTML = '';
+
+        db.transaction("rewards", "readonly").objectStore("rewards").getAll().onsuccess = (e) => {
+            const list = e.target.result;
+            list.forEach(r => {
+                const card = document.createElement('div');
+                card.className = "item-card flex-between";
+                card.innerHTML = `
+                    <div>
+                        <strong>${r.name}</strong><br>
+                        <span class="reward-tag priority-${r.priority}">${r.priority.toUpperCase()}</span>
+                    </div>
+                    <div>
+                        ${r.status === 'unlocked' ? `<button class="claim-btn" onclick="claimReward(${r.id})">Claim</button>` : `<button class="danger-btn" onclick="deleteReward(${r.id})">Delete</button>`}
+                    </div>
+                `;
+                if(r.status === 'unlocked') {
+                    unlockedContainer.appendChild(card);
+                } else {
+                    container.appendChild(card);
+                }
+            });
+            if(!unlockedContainer.innerHTML) unlockedContainer.innerHTML = `<p style="color:var(--muted); font-size:0.9rem; text-align:center;">No rewards unlocked yet. Complete your goals!</p>`;
+        };
+    }
+
+    function deleteReward(id) {
+        if(confirm("Delete this reward from your asset pool?")) {
+            let tx = db.transaction("rewards", "readwrite");
+            tx.objectStore("rewards").delete(id);
+            tx.oncomplete = () => renderAll();
+        }
+    }
+
+    function claimReward(id) {
+        let tx = db.transaction("rewards", "readwrite");
+        tx.objectStore("rewards").delete(id);
+        tx.oncomplete = () => renderAll();
+    }
+
+    function populateRewardDropdown() {
+        const select = document.getElementById('goalRewardSelect');
+        select.innerHTML = '<option value="">No Reward Assigned Yet</option>';
+        db.transaction("rewards", "readonly").objectStore("rewards").getAll().onsuccess = (e) => {
+            e.target.result.filter(r => r.status === 'pool').forEach(r => {
+                select.innerHTML += `<option value="${r.id}">${r.name} (${r.priority})</option>`;
+            });
+        };
+    }
+
+    // --- GOALS LOGIC ---
+    function saveGoal() {
+        const title = document.getElementById('goalTitle').value.trim();
+        const days = parseInt(document.getElementById('goalDays').value);
+        const rewardId = document.getElementById('goalRewardSelect').value;
+        if(!title || isNaN(days)) return;
+
+        let tx = db.transaction("goals", "readwrite");
+        tx.objectStore("goals").add({
+            title, days, streak: 0, rewardId: rewardId ? parseInt(rewardId) : null
+        });
+        tx.oncomplete = () => {
+            closeModal('goalModal');
+            document.getElementById('goalTitle').value = '';
+            renderAll();
+        };
+    }
+
+    function renderGoals() {
+        const container = document.getElementById('goalsContainer');
+        container.innerHTML = '';
+
+        db.transaction(["goals", "rewards"], "readonly").objectStore("goals").getAll().onsuccess = (e) => {
+            const goals = e.target.result;
+            if(goals.length === 0) {
+                container.innerHTML = `<p style="color:var(--muted); text-align:center;">No active goals. Add one below!</p>`;
+                return;
+            }
+            
+            goals.forEach(g => {
+                const card = document.createElement('div');
+                card.className = "item-card goal-card flex-between";
+                
+                let rewardHtml = `<span style="font-size:0.8rem; color:var(--muted);">No Reward linked</span>`;
+                if(g.rewardId) {
+                    db.transaction("rewards", "readonly").objectStore("rewards").get(g.rewardId).onsuccess = (re) => {
+                        if(re.target.result) {
+                            document.getElementById(`rew-${g.id}`).innerHTML = `🎁 Reward: <strong>${re.target.result.name}</strong>`;
+                        }
+                    };
+                    rewardHtml = `<span id="rew-${g.id}" style="font-size:0.8rem; color:var(--muted);">Loading reward...</span>`;
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <strong style="font-size:1.1rem;">${g.title}</strong><br>
+                        ${rewardHtml}
+                    </div>
+                    <div class="flex-between">
+                        <span class="streak-badge">${g.streak} / ${g.days} Days</span>
+                        <button class="danger-btn" onclick="deleteGoal(${g.id})">X</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+    }
+
+    function deleteGoal(id) {
+        if(confirm("Delete this goal? Stream metrics will be lost.")) {
+            let tx = db.transaction("goals", "readwrite");
+            tx.objectStore("goals").delete(id);
+            tx.oncomplete = () => renderAll();
+        }
+    }
+
+    // --- CALENDAR & PROGRESS ENGINE ---
+    function changeMonth(direction) {
+        currentNavDate.setMonth(currentNavDate.getMonth() + direction);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        const monthYearLabel = document.getElementById('calendarMonthYear');
+        grid.innerHTML = '';
+
+        const year = currentNavDate.getFullYear();
+        const month = currentNavDate.getMonth();
+        
+        monthYearLabel.innerText = currentNavDate.toLocaleDateString('default', { month: 'long', year: 'numeric' });
+
+        const daysInWeek = ['S','M','T','W','T','F','S'];
+        daysInWeek.forEach(d => grid.innerHTML += `<div class="calendar-day-name">${d}</div>`);
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        for(let i=0; i<firstDayIndex; i++) {
+            grid.innerHTML += `<div class="calendar-day empty"></div>`;
+        }
+
+        // Fetch historical log mappings
+        db.transaction("history", "readonly").objectStore("history").getAll().onsuccess = (event) => {
+            const logs = event.target.result.reduce((acc, current) => {
+                acc[current.dateStr] = current.status; 
+                return acc;
+            }, {});
+
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+
+            for(let day=1; day<=totalDays; day++) {
+                const dateStr = `${year}-${month}-${day}`;
+                let statusClass = '';
+                if(logs[dateStr] === 'success') statusClass = 'day-status-success';
+                if(logs[dateStr] === 'fail') statusClass = 'day-status-fail';
+
+                const isToday = todayStr === dateStr ? 'today' : '';
+                
+                grid.innerHTML += `
+                    <div class="calendar-day ${statusClass} ${isToday}" onclick="openDayLog('${dateStr}', ${day})">
+                        ${day}
+                        ${isToday ? '<div class="day-dot"></div>': ''}
+                    </div>
+                `;
+            }
+        };
+    }
+
+    function openDayLog(dateStr, displayDay) {
+        selectedLogDateStr = dateStr;
+        document.getElementById('logModalDate').innerText = currentNavDate.toLocaleDateString('default', { month: 'long', year: 'numeric' }) + ` ${displayDay}`;
+        
+        const container = document.getElementById('logModalGoalsList');
+        container.innerHTML = '';
+
+        db.transaction("history", "readonly").objectStore("history").get(dateStr).onsuccess = (e) => {
+            const existing = e.target.result;
+            const currentStatus = existing ? existing.status : 'none';
+
+            container.innerHTML = `
+                <p>How did your habit execution go today overall?</p>
+                <div class="grid-2">
+                    <button style="background:var(--success)" onclick="submitDayStatus('success')">🎯 Succeeded</button>
+                    <button style="background:var(--danger)" onclick="submitDayStatus('fail')">❌ Failed</button>
+                </div>
+                ${currentStatus !== 'none' ? `<button class="secondary" onclick="submitDayStatus('clear')">Reset Entry Data</button>` : ''}
+            `;
+            document.getElementById('logModal').style.display = 'flex';
+        };
+    }
+
+    function submitDayStatus(status) {
+        let historyTx = db.transaction("history", "readwrite");
+        let store = historyTx.objectStore("history");
+
+        if (status === 'clear') {
+            store.delete(selectedLogDateStr);
+        } else {
+            store.put({ dateStr: selectedLogDateStr, status: status });
+        }
+
+        historyTx.oncomplete = () => {
+            closeModal('logModal');
+            if (status !== 'clear') {
+                recalculateStreaks(status);
+            } else {
+                renderAll();
+            }
+        };
+    }
+
+    // Processing algorithm for automated streak counting & unlocks
+    function recalculateStreaks(latestStatus) {
+        let tx = db.transaction(["goals", "rewards"], "readwrite");
+        let goalStore = tx.objectStore("goals");
+        let rewardStore = tx.objectStore("rewards");
+
+        goalStore.getAll().onsuccess = (e) => {
+            const goals = e.target.result;
+            goals.forEach(goal => {
+                if(latestStatus === 'success') {
+                    goal.streak += 1;
+                    if(goal.streak >= goal.days) {
+                        // Goal target met! Trigger asset unlock
+                        if(goal.rewardId) {
+                            rewardStore.get(goal.rewardId).onsuccess = (re) => {
+                                let rew = re.target.result;
+                                if(rew) {
+                                    rew.status = 'unlocked';
+                                    rewardStore.put(rew);
+                                }
+                            };
+                        }
+                        goalStore.delete(goal.id); // Wipe completed goal automatically
+                    } else {
+                        goalStore.put(goal);
+                    }
+                } else if(latestStatus === 'fail') {
+                    goal.streak = 0; // Broken streak reset mechanics
+                    goalStore.put(goal);
+                }
+            });
+        };
+
+        tx.oncomplete = () => {
+            renderAll();
+        };
+    }
+</script>
+</body>
+</html>
