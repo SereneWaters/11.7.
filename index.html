@@ -4,111 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dreamy Habit RPG Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRfbmFtZSI6ICJIYWJpdFNoY29yZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMTAwODJiIiwKICAidGhlbWVfY29sb3IiOiAiI2Q2YmNmZiIKfQ==">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRlcl9uYW1lIjogIkhhYml0U2hjb3JlIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxMDA4MmIiLAogICJ0aGVtZV9jb2xvciI6ICIjZDZiY2ZmIgp9">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Default Dark Mode Theme */
             --bg: linear-gradient(135deg, #0e0720 0%, #1c0f3a 40%, #3a1c5d 75%, #5d327c 100%);
             --card: rgba(255, 255, 255, 0.06);
             --card-border: rgba(220, 180, 255, 0.15);
             --text: #f1e9ff;
+            --text-heading: #ffffff;
             --muted: #bda6e0;
             --primary: #b388ff;
             --primary-glow: rgba(179, 136, 255, 0.4);
+            --btn-gradient: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
             --success: #81c784;
             --danger: #ff8a80;
             --warning: #ffd54f;
             --low: #90caf9;
             --medium: #ce93d8;
             --high: #f48fb1;
+            --input-bg: rgba(14, 7, 32, 0.4);
+            --modal-bg: rgba(30, 18, 54, 0.95);
+            --heading-shadow: 0 0 10px rgba(220, 180, 255, 0.6), 0 0 20px rgba(179, 136, 255, 0.3);
         }
+
+        /* Light Mode Custom Palette based on Heaven Clouds & Glitter Wallpaper */
+        [data-theme="light"] {
+            --bg: linear-gradient(135deg, #f3ecf9 0%, #e3d2f6 35%, #fcd6eb 70%, #f7e6f3 100%);
+            --card: rgba(255, 255, 255, 0.65);
+            --card-border: rgba(214, 158, 237, 0.35);
+            --text: #4e366e;
+            --text-heading: #582f8c;
+            --muted: #8b71b0;
+            --primary: #ff8bbb;
+            --primary-glow: rgba(255, 139, 187, 0.4);
+            --btn-gradient: linear-gradient(135deg, #ff8bbb 0%, #b382ec 100%);
+            --success: #66bb6a;
+            --danger: #ff6b6b;
+            --warning: #ffa726;
+            --low: #a0c4ff;
+            --medium: #cbb4f7;
+            --high: #ffadad;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --modal-bg: rgba(253, 246, 255, 0.98);
+            --heading-shadow: 0 2px 4px rgba(186, 119, 219, 0.2), 0 0 8px rgba(255, 139, 187, 0.3);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg);
             background-attachment: fixed;
             color: var(--text);
             margin: 0;
             padding: 12px;
-            padding-bottom: 60px;
+            padding-bottom: 80px;
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
         h1, h2, h3 { 
             margin-top: 0; 
-            color: #ffffff; 
-            text-shadow: 0 0 10px rgba(220, 180, 255, 0.6), 0 0 20px rgba(179, 136, 255, 0.3);
-            font-weight: 300;
-            letter-spacing: 0.5px;
+            color: var(--text-heading); 
+            text-shadow: var(--heading-shadow);
+            font-weight: 700;
+            letter-spacing: 0.2px;
         }
         .section {
             background: var(--card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 18px;
             margin-bottom: 18px;
-            box-shadow: 0 8px 32px 0 rgba(14, 7, 32, 0.3);
+            box-shadow: 0 8px 24px rgba(135, 90, 180, 0.1);
         }
-        .status-bar { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 12px; opacity: 0.8; }
+        .status-bar { font-size: 0.85rem; color: var(--muted); text-align: center; margin-bottom: 12px; font-weight: 600; }
         
-        /* Form Controls */
         input, select, textarea {
             width: 100%;
             padding: 11px;
             margin: 6px 0 14px 0;
-            background: rgba(14, 7, 32, 0.4);
-            border: 1px solid rgba(220, 180, 255, 0.25);
-            border-radius: 8px;
-            color: white;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            color: var(--text);
             box-sizing: border-box;
+            font-family: inherit;
             font-size: 1rem;
             outline: none;
-            transition: border-color 0.2s;
         }
         input:focus, select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 8px var(--primary-glow);
         }
         button {
-            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+            background: var(--btn-gradient);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: inherit;
             cursor: pointer;
             width: 100%;
             font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3);
-            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(179, 136, 255, 0.2);
+            transition: transform 0.1s, box-shadow 0.2s;
         }
-        button:active { transform: scale(0.98); }
-        button.secondary { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); margin-top: 4px; box-shadow: none; color: var(--text); }
-        button.action-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; font-weight: normal; margin-left: 4px; box-shadow: none; }
-        button.edit-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); }
-        button.danger-btn { background: linear-gradient(135deg, #e91e63, #f44336); }
-        button.claim-btn { background: linear-gradient(135deg, #4caf50, #009688); width: auto; padding: 8px 16px; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(76,175,80,0.3); }
+        button:active { transform: scale(0.97); }
+        button.secondary { background: rgba(0, 0, 0, 0.05); border: 1px solid var(--card-border); margin-top: 4px; box-shadow: none; color: var(--text); }
+        [data-theme="dark"] button.secondary { background: rgba(255, 255, 255, 0.08); }
+        button.action-btn { width: auto; padding: 6px 14px; font-size: 0.8rem; font-weight: 600; margin-left: 4px; box-shadow: none; border-radius: 8px; }
+        button.edit-btn { background: rgba(0,0,0,0.06); color: var(--text); border: 1px solid var(--card-border); }
+        [data-theme="dark"] button.edit-btn { background: rgba(255,255,255,0.15); }
+        button.danger-btn { background: linear-gradient(135deg, #ff7676, #f44336); }
+        button.claim-btn { background: linear-gradient(135deg, #ff71b2, #ec407a); width: auto; padding: 8px 18px; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(236,64,122,0.3); }
 
-        /* Flex helpers */
         .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .button-group { display: flex; gap: 6px; }
 
-        /* Items Lists */
         .item-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(220, 180, 255, 0.1);
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
             padding: 14px;
             margin-top: 10px;
             position: relative;
         }
+        [data-theme="dark"] .item-card { background: rgba(255, 255, 255, 0.03); }
+        
         .goal-card { 
-            border-left: 4px solid var(--primary); 
+            border-left: 5px solid var(--primary); 
             box-shadow: inset 5px 0 10px -5px var(--primary-glow);
         }
         .reward-tag {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 20px;
             font-size: 0.72rem;
             font-weight: bold;
@@ -116,160 +150,184 @@
             margin-top: 6px;
             letter-spacing: 0.5px;
         }
-        .priority-low { background-color: var(--low); box-shadow: 0 0 6px rgba(144,202,249,0.4); }
-        .priority-medium { background-color: var(--medium); box-shadow: 0 0 6px rgba(206,147,216,0.4); }
-        .priority-high { background-color: var(--high); box-shadow: 0 0 6px rgba(244,143,177,0.4); }
+        .priority-low { background-color: #8cb6f6; }
+        .priority-medium { background-color: #bfa3f0; }
+        .priority-high { background-color: #fca1c1; }
         
         .streak-badge {
-            background: rgba(147, 112, 219, 0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 4px 10px;
+            background: rgba(241, 139, 187, 0.15);
+            border: 1px solid var(--primary-glow);
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
-            font-weight: bold;
-            color: #e1d5ff;
+            font-weight: 700;
+            color: var(--text-heading);
             white-space: nowrap;
         }
 
-        /* Habit Row Inside Logger */
+        /* Multistate Log Toggles */
         .habit-log-row {
-            background: rgba(14, 7, 32, 0.3);
-            border: 1px solid rgba(220, 180, 255, 0.15);
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--card-border);
             padding: 14px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-        .habit-toggle-btn {
-            width: auto;
-            padding: 8px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 0.9rem;
+        [data-theme="dark"] .habit-log-row { background: rgba(14, 7, 32, 0.3); }
+        
+        .state-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .state-btn {
+            padding: 9px;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.04);
+            border: 1px solid var(--card-border);
+            color: var(--muted);
             box-shadow: none;
+            border-radius: 8px;
         }
-        .habit-toggle-btn.done {
-            background: linear-gradient(135deg, #7e57c2, #ba68c8);
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 0 10px rgba(186, 104, 200, 0.5);
-        }
+        [data-theme="dark"] .state-btn { background: rgba(255,255,255,0.05); }
+        .state-btn.active-pending { background: #7c7393; color: #fff; border-color: #9287ab; }
+        .state-btn.active-success { background: linear-gradient(135deg, #57b65b, #81c784); color: #fff; border-color: #81c784; box-shadow: 0 0 8px rgba(76,175,80,0.3); }
+        .state-btn.active-failed { background: linear-gradient(135deg, #e65252, #ff7171); color: #fff; border-color: #ff8a80; box-shadow: 0 0 8px rgba(239,68,68,0.3); }
 
         /* Calendar Styling */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .calendar-header button { width: auto; padding: 6px 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); box-shadow: none; }
+        .calendar-header button { width: auto; padding: 6px 14px; background: rgba(0,0,0,0.04); border: 1px solid var(--card-border); box-shadow: none; color: var(--text); }
+        [data-theme="dark"] .calendar-header button { background: rgba(255,255,255,0.08); }
+        
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 6px;
             text-align: center;
         }
-        .calendar-day-name { font-size: 0.75rem; color: var(--muted); font-weight: bold; padding-bottom: 6px; }
+        .calendar-day-name { font-size: 0.75rem; color: var(--muted); font-weight: 700; padding-bottom: 6px; }
         .calendar-day {
             aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(14, 7, 32, 0.25);
-            border: 1px solid rgba(220, 180, 255, 0.05);
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
             font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
             position: relative;
-            transition: background-color 0.2s, border-color 0.2s;
         }
-        .calendar-day:hover { background: rgba(255, 255, 255, 0.05); }
-        .calendar-day.today { border: 2px solid var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+        [data-theme="dark"] .calendar-day { background: rgba(14, 7, 32, 0.25); border-color: rgba(220, 180, 255, 0.05); }
+        .calendar-day:hover { background: rgba(255, 255, 255, 0.4); }
+        .calendar-day.today { border: 2px solid var(--primary); box-shadow: 0 0 8px var(--primary-glow); font-weight: 700; }
         .calendar-day.empty { background: transparent; border: none; cursor: default; }
-        .calendar-day.empty:hover { background: transparent; }
         
-        /* Dynamic Calendar Status Shades (Sparkly Dreamy Palettes) */
-        .day-all-success { background-color: rgba(186, 104, 200, 0.35); border: 1px solid rgba(244, 143, 177, 0.6); box-shadow: inset 0 0 8px rgba(186, 104, 200, 0.4); }
-        .day-some-success { background-color: rgba(103, 58, 183, 0.25); border: 1px solid rgba(179, 136, 255, 0.4); }
-        .day-all-fail { background-color: rgba(239, 68, 68, 0.15); border: 1px solid rgba(255, 138, 128, 0.3); }
-        .day-dot { width: 5px; height: 5px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px #ffffff; margin-top: 3px; }
+        /* Advanced Dynamic Color Codes */
+        .day-all-success { background-color: rgba(102, 187, 106, 0.25); border: 1px solid var(--success); }
+        .day-mixed-status { background-color: rgba(186, 104, 200, 0.25); border: 1px solid var(--primary); }
+        .day-any-fail { background-color: rgba(255, 107, 107, 0.2); border: 1px solid var(--danger); }
+        .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 6px var(--primary); margin-top: 3px; }
 
-        /* Modal / Overlay for logging */
+        /* Modal Layouts */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10, 4, 24, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(36, 21, 56, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 100;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
         .modal-content { 
-            background: rgba(30, 18, 54, 0.9); 
-            border: 1px solid rgba(220, 180, 255, 0.25);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            padding: 22px; 
-            border-radius: 16px; 
+            background: var(--modal-bg); 
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 40px rgba(93, 45, 137, 0.25);
+            padding: 24px; 
+            border-radius: 24px; 
             width: 100%; 
             max-width: 400px; 
             max-height: 85vh; 
             overflow-y: auto; 
         }
 
-        /* Celebration Screen Layout */
-        .victory-title { font-size: 2rem; color: #ffd54f; text-shadow: 0 0 15px rgba(255,213,79,0.6); text-align: center; margin-bottom: 10px; }
-        .victory-reward { font-size: 1.2rem; background: rgba(179,136,255,0.15); padding: 14px; border-radius: 10px; text-align: center; border: 1px dashed var(--primary); margin: 15px 0; color: #fff; }
+        .victory-title { font-size: 1.8rem; color: #ff60a8; text-shadow: 0 0 12px rgba(255,96,168,0.4); text-align: center; margin-bottom: 10px; font-weight: 700; }
+        .victory-reward { font-size: 1.2rem; background: rgba(255,139,187,0.12); padding: 14px; border-radius: 14px; text-align: center; border: 1px dashed var(--primary); margin: 15px 0; color: var(--text-heading); }
         canvas#celebrationCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+
+        /* Magical Theme Toggle Button */
+        .theme-toggle-btn {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--btn-gradient);
+            box-shadow: 0 4px 16px rgba(160, 90, 220, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            z-index: 90;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-    <div class="status-bar" id="storageLock">Securing App Engine...</div>
+    <div class="status-bar" id="storageLock">🎀 Securing App Engine...</div>
     <canvas id="celebrationCanvas"></canvas>
 
-    <!-- 1. GOALS SECTION -->
+    <!-- GOALS SECTION -->
     <div class="section">
-        <h2>🎯 Active Goals</h2>
+        <h2>👑 Active Princess Goals</h2>
         <div id="goalsContainer"></div>
-        <button onclick="openGoalModal()">+ Create New Goal</button>
+        <button onclick="openGoalModal()">💕 Create New Goal</button>
     </div>
 
-    <!-- 4. CALENDAR SECTION -->
+    <!-- CALENDAR SECTION -->
     <div class="section">
         <div class="calendar-header">
-            <button onclick="changeMonth(-1)">◀</button>
+            <button onclick="changeMonth(-1)">🌸 Prev</button>
             <h3 id="calendarMonthYear" style="margin:0;">Month Year</h3>
-            <button onclick="changeMonth(1)">▶</button>
+            <button onclick="changeMonth(1)">Next 🌸</button>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
-    <!-- 3. UNLOCKED REWARDS (SHOPPING LIST) -->
-    <div class="section" style="border: 1px solid rgba(129, 199, 132, 0.4); background: rgba(129, 199, 132, 0.03);">
-        <h2>🎁 Unlocked Rewards (Ready to Claim)</h2>
+    <!-- UNLOCKED REWARDS -->
+    <div class="section" style="border: 1px solid rgba(255, 139, 187, 0.4); background: rgba(255, 139, 187, 0.04);">
+        <h2>🎁 Claimable Royal Treats</h2>
         <div id="unlockedContainer"></div>
     </div>
 
-    <!-- 2. REWARD VAULT -->
+    <!-- REWARD VAULT -->
     <div class="section">
-        <h2>💎 Reward List Pool</h2>
+        <h2>💎 Reward Treasury Pool</h2>
         <div id="rewardsContainer"></div>
-        <button onclick="openRewardModal()">+ Create New Reward Pool Item</button>
+        <button onclick="openRewardModal()">⭐ Create New Reward Item</button>
     </div>
 
-    <!-- MODAL: GOAL CREATION / EDITING -->
+    <!-- MODAL: GOAL MODAL -->
     <div class="modal" id="goalModal">
         <div class="modal-content">
             <h3 id="goalModalTitle">Create New Goal</h3>
             <input type="hidden" id="editGoalId" value="">
             
-            <label>Goal Title (e.g., 10k Steps Daily)</label>
-            <input type="text" id="goalTitle" placeholder="Walk 10k steps">
+            <label>Goal Title</label>
+            <input type="text" id="goalTitle" placeholder="🌸 Drink clear water, read books...">
             
-            <label>Duration Target (Days in a row)</label>
+            <label>Target Streak (Consecutive Days Needed)</label>
             <input type="number" id="goalDays" value="7" min="1">
             
-            <label>Link Reward</label>
+            <label>Link Reward From Treasury</label>
             <select id="goalRewardSelect"><option value="">No Reward Assigned Yet</option></select>
             
             <button id="saveGoalBtn" onclick="saveGoal()">Create Goal</button>
@@ -277,23 +335,23 @@
         </div>
     </div>
 
-    <!-- MODAL: REWARD CREATION / EDITING -->
+    <!-- MODAL: REWARD MODAL -->
     <div class="modal" id="rewardModal">
         <div class="modal-content">
-            <h3>Create Reward</h3>
+            <h3>Create Reward Pool Item</h3>
             <input type="hidden" id="editRewardId" value="">
             
             <label>Reward Name</label>
-            <input type="text" id="rewardName" placeholder="Cheat Meal, New Game, Sleep In">
+            <input type="text" id="rewardName" placeholder="🎀 Bubble bath, cute dress, gaming night">
             
-            <label>Priority Color Focus</label>
+            <label>Priority Theme Color</label>
             <select id="rewardPriority">
-                <option value="low">Low Priority (Blue)</option>
-                <option value="medium" selected>Medium Priority (Purple)</option>
-                <option value="high">High Priority (Pink)</option>
+                <option value="low">Soft Sky Blue</option>
+                <option value="medium" selected>Dreamy Lilac</option>
+                <option value="high">Glitter Pink</option>
             </select>
             
-            <button id="saveRewardBtn" onclick="saveReward()">Save to Pool</button>
+            <button id="saveRewardBtn" onclick="saveReward()">Save to Treasury</button>
             <button class="secondary" onclick="closeModal('rewardModal')">Cancel</button>
         </div>
     </div>
@@ -301,31 +359,33 @@
     <!-- MODAL: INDIVIDUAL DAY LOGGER -->
     <div class="modal" id="logModal">
         <div class="modal-content">
-            <h3 id="logModalTitle">Log Habits</h3>
-            <p id="logModalDate" style="color: var(--muted); margin-bottom: 16px;"></p>
+            <h3>Log Fairy Habits</h3>
+            <p id="logModalDate" style="color: var(--muted); margin-bottom: 16px; font-weight:600;"></p>
             <div id="logModalGoalsList"></div>
-            <button class="secondary" onclick="closeModal('logModal')" style="margin-top:12px;">Done Tracking</button>
+            <button class="secondary" onclick="closeModal('logModal')" style="margin-top:12px;">Close</button>
         </div>
     </div>
 
     <!-- MODAL: CELEBRATION POPUP -->
     <div class="modal" id="celebrationModal" style="z-index: 1000;">
-        <div class="modal-content" style="text-align: center; border: 1px solid #ffd54f;">
-            <div class="victory-title">🎉 GOAL ACHIEVED! 🎉</div>
+        <div class="modal-content" style="text-align: center; border: 2px solid #ff8bbb;">
+            <div class="victory-title">✨ STREAK UNLOCKED! ✨</div>
             <p id="celebrationGoalText" style="font-size: 1.1rem; font-weight: bold; margin: 10px 0;"></p>
             <div id="celebrationRewardBox" class="victory-reward"></div>
-            <p style="color: var(--muted); font-size: 0.9rem;">Your reward has been added to your Unlocked Rewards list!</p>
-            <button onclick="closeModal('celebrationModal')" style="background: linear-gradient(135deg, #4caf50, #009688); margin-top: 10px;">Awesome!</button>
+            <button onclick="closeModal('celebrationModal')" style="background: var(--btn-gradient); margin-top: 10px;">Magical!</button>
         </div>
     </div>
+
+    <!-- FLOATING THEME TOGGLE SWITCH -->
+    <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Switch Aesthetics">🌓</button>
 
 <script>
     let db;
     let currentNavDate = new Date();
     let selectedLogDateStr = "";
 
-    // Open & Protect Database (Version 3 incorporates granular goal tracking)
-    const dbRequest = indexedDB.open("HabitRPGDatabase", 3);
+    // Set up database connections
+    const dbRequest = indexedDB.open("HabitRPGDatabase", 4);
     dbRequest.onupgradeneeded = (e) => {
         let database = e.target.result;
         if(!database.objectStoreNames.contains("goals")) database.createObjectStore("goals", { keyPath: "id", autoIncrement: true });
@@ -338,15 +398,31 @@
     };
 
     function initApp() {
+        // Load saved theme configuration
+        const savedTheme = localStorage.getItem("girly-rpg-theme") || "dark";
+        document.body.setAttribute("data-theme", savedTheme);
+        document.getElementById("themeToggle").innerText = savedTheme === "dark" ? "☁️" : "🔮";
+
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(granted => {
-                document.getElementById('storageLock').innerText = granted ? "🔮 Permanent Arcane Storage Engaged" : "⚠️ Memory Management Engaged";
+                document.getElementById('storageLock').innerText = granted ? "✨ Permanent Fairy Storage Active" : "🌸 Temporary Memory Mode";
             });
         }
         setupCanvasSize();
         window.addEventListener('resize', setupCanvasSize);
         initAmbientSparkles();
-        renderAll();
+        recalculateAllStreaks(() => {
+            renderAll();
+        });
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute("data-theme");
+        const nextTheme = currentTheme === "dark" ? "light" : "dark";
+        document.body.setAttribute("data-theme", nextTheme);
+        localStorage.setItem("girly-rpg-theme", nextTheme);
+        document.getElementById("themeToggle").innerText = nextTheme === "dark" ? "☁️" : "🔮";
+        renderCalendar();
     }
 
     function renderAll() {
@@ -357,10 +433,19 @@
 
     function closeModal(id) { 
         document.getElementById(id).style.display = 'none'; 
-        if(id === 'logModal') renderAll(); 
+        if(id === 'logModal') {
+            recalculateAllStreaks(() => renderAll());
+        }
     }
 
     // --- REWARDS LOGIC ---
+    function openRewardModal() {
+        document.getElementById('editRewardId').value = "";
+        document.getElementById('rewardName').value = "";
+        document.getElementById('rewardPriority').value = "medium";
+        document.getElementById('rewardModal').style.display = 'flex';
+    }
+
     function saveReward() {
         const name = document.getElementById('rewardName').value.trim();
         const priority = document.getElementById('rewardPriority').value;
@@ -413,41 +498,42 @@
                 if(r.status === 'unlocked') {
                     card.innerHTML = `
                         <div>
-                            <strong>${r.name}</strong><br>
+                            <strong>🌸 ${r.name}</strong><br>
                             <span class="reward-tag priority-${r.priority}">${r.priority.toUpperCase()}</span>
                         </div>
                         <div class="button-group">
                             <button class="action-btn edit-btn" onclick="openEditReward(${r.id})">Edit</button>
-                            <button class="claim-btn" onclick="claimReward(${r.id})">Claim</button>
+                            <button class="claim-btn" onclick="claimReward(${r.id})">Claim 💕</button>
                         </div>
                     `;
                     unlockedContainer.appendChild(card);
                 } else {
                     card.innerHTML = `
                         <div>
-                            <strong>${r.name}</strong><br>
+                            <strong>✨ ${r.name}</strong><br>
                             <span class="reward-tag priority-${r.priority}">${r.priority.toUpperCase()}</span>
                         </div>
                         <div class="button-group">
                             <button class="action-btn edit-btn" onclick="openEditReward(${r.id})">Edit</button>
-                            <button class="action-btn danger-btn" onclick="deleteReward(${r.id})">Delete</button>
+                            <button class="action-btn danger-btn" onclick="deleteReward(${r.id})">Drop</button>
                         </div>
                     `;
                     container.appendChild(card);
                 }
             });
-            if(!unlockedContainer.innerHTML) unlockedContainer.innerHTML = `<p style="color:var(--muted); font-size:0.9rem; text-align:center;">No rewards unlocked yet. Complete your goals!</p>`;
+            if(!unlockedContainer.innerHTML) unlockedContainer.innerHTML = `<p style="color:var(--muted); font-size:0.9rem; text-align:center;">No rewards ready yet. Stay sweet! ✨</p>`;
         };
     }
 
     function deleteReward(id) {
-        if(confirm("Delete this reward from your asset pool?")) {
+        if(confirm("Remove this reward setup?")) {
             let tx = db.transaction("rewards", "readwrite");
             tx.objectStore("rewards").delete(id);
             tx.oncomplete = () => renderAll();
         }
     }
 
+    // Claim rewards processing
     function claimReward(id) {
         let tx = db.transaction("rewards", "readwrite");
         tx.objectStore("rewards").delete(id);
@@ -490,13 +576,13 @@
 
         tx.oncomplete = () => {
             closeModal('goalModal');
-            renderAll();
+            recalculateAllStreaks(() => renderAll());
         };
     }
 
     function openGoalModal() {
         document.getElementById('goalModalTitle').innerText = "Create New Goal";
-        document.getElementById('saveGoalBtn').innerText = "Create Goal";
+        document.getElementById('saveGoalBtn').innerText = "Create Goal 💕";
         document.getElementById('editGoalId').value = "";
         document.getElementById('goalTitle').value = "";
         document.getElementById('goalDays').value = "7";
@@ -509,7 +595,7 @@
             const g = e.target.result;
             if (!g) return;
             document.getElementById('goalModalTitle').innerText = "Edit Active Goal";
-            document.getElementById('saveGoalBtn').innerText = "Update Goal";
+            document.getElementById('saveGoalBtn').innerText = "Update Goal ✨";
             document.getElementById('editGoalId').value = g.id;
             document.getElementById('goalTitle').value = g.title;
             document.getElementById('goalDays').value = g.days;
@@ -525,7 +611,7 @@
         db.transaction(["goals", "rewards"], "readonly").objectStore("goals").getAll().onsuccess = (e) => {
             const goals = e.target.result;
             if(goals.length === 0) {
-                container.innerHTML = `<p style="color:var(--muted); text-align:center;">No active goals. Add one below!</p>`;
+                container.innerHTML = `<p style="color:var(--muted); text-align:center;">No goals tracked yet. Add one below! 🎀</p>`;
                 return;
             }
             
@@ -533,25 +619,23 @@
                 const card = document.createElement('div');
                 card.className = "item-card goal-card flex-between";
                 
-                let rewardHtml = `<span style="font-size:0.8rem; color:var(--muted);">No Reward linked</span>`;
+                let rewardHtml = `<span style="font-size:0.8rem; color:var(--muted);">No Gift linked</span>`;
                 if(g.rewardId) {
                     db.transaction("rewards", "readonly").objectStore("rewards").get(g.rewardId).onsuccess = (re) => {
                         if(re.target.result) {
                             document.getElementById(`rew-${g.id}`).innerHTML = `🎁 Reward: <strong>${re.target.result.name}</strong>`;
-                        } else {
-                            document.getElementById(`rew-${g.id}`).innerHTML = `<span style="color:var(--danger)">Linked reward missing!</span>`;
                         }
                     };
-                    rewardHtml = `<span id="rew-${g.id}" style="font-size:0.8rem; color:var(--muted);">Loading reward...</span>`;
+                    rewardHtml = `<span id="rew-${g.id}" style="font-size:0.8rem; color:var(--muted);">Loading gift...</span>`;
                 }
 
                 card.innerHTML = `
-                    <div style="overflow: hidden; text-overflow: ellipsis;">
-                        <strong style="font-size:1.1rem; color:#fff;">${g.title}</strong><br>
+                    <div>
+                        <strong style="font-size:1.1rem; color:var(--text-heading);">🎀 ${g.title}</strong><br>
                         ${rewardHtml}
                     </div>
-                    <div class="flex-between" style="flex-shrink: 0;">
-                        <span class="streak-badge">${g.streak} / ${g.days} Days</span>
+                    <div class="flex-between">
+                        <span class="streak-badge">⭐ ${g.streak} / ${g.days} Days</span>
                         <div class="button-group">
                             <button class="action-btn edit-btn" onclick="openEditGoal(${g.id})">Edit</button>
                             <button class="action-btn danger-btn" onclick="deleteGoal(${g.id})">X</button>
@@ -564,14 +648,79 @@
     }
 
     function deleteGoal(id) {
-        if(confirm("Delete this goal? Stream metrics will be lost.")) {
+        if(confirm("Delete this habit goal configuration?")) {
             let tx = db.transaction("goals", "readwrite");
             tx.objectStore("goals").delete(id);
             tx.oncomplete = () => renderAll();
         }
     }
 
-    // --- CALENDAR & PROGRESS ENGINE ---
+    // --- CONSECUTIVE STREAK ALGORITHM ---
+    function recalculateAllStreaks(callback) {
+        let tx = db.transaction(["history", "goals", "rewards"], "readwrite");
+        let historyStore = tx.objectStore("history");
+        let goalStore = tx.objectStore("goals");
+        let rewardStore = tx.objectStore("rewards");
+
+        historyStore.getAll().onsuccess = (he) => {
+            const logs = he.target.result.reduce((acc, current) => {
+                acc[current.dateStr] = current.statuses || {};
+                return acc;
+            }, {});
+
+            goalStore.getAll().onsuccess = (ge) => {
+                const goals = ge.target.result;
+                let pendingOperations = goals.length;
+
+                if (pendingOperations === 0 && callback) callback();
+
+                goals.forEach(goal => {
+                    let currentStreak = 0;
+                    let checkDate = new Date(); 
+                    let broke = false;
+
+                    for (let i = 0; i < 365; i++) {
+                        let dateStr = `${checkDate.getFullYear()}-${checkDate.getMonth()}-${checkDate.getDate()}`;
+                        let dayStatus = logs[dateStr] ? logs[dateStr][goal.id] : undefined;
+
+                        if (dayStatus === "success") {
+                            currentStreak++;
+                        } else if (dayStatus === "failed") {
+                            broke = true;
+                        } else {
+                            if (i > 0) broke = true;
+                        }
+
+                        if (broke) break;
+                        checkDate.setDate(checkDate.getDate() - 1); 
+                    }
+
+                    goal.streak = currentStreak;
+
+                    if (goal.streak >= goal.days) {
+                        triggerCelebration(goal);
+                        if (goal.rewardId) {
+                            rewardStore.get(goal.rewardId).onsuccess = (re) => {
+                                let rew = re.target.result;
+                                if(rew) {
+                                    rew.status = 'unlocked';
+                                    rewardStore.put(rew);
+                                }
+                            };
+                        }
+                        goalStore.delete(goal.id);
+                    } else {
+                        goalStore.put(goal);
+                    }
+
+                    pendingOperations--;
+                    if (pendingOperations === 0 && callback) callback();
+                });
+            };
+        };
+    }
+
+    // --- CALENDAR ENGINE ---
     function changeMonth(direction) {
         currentNavDate.setMonth(currentNavDate.getMonth() + direction);
         renderCalendar();
@@ -584,11 +733,9 @@
 
         const year = currentNavDate.getFullYear();
         const month = currentNavDate.getMonth();
-        
         monthYearLabel.innerText = currentNavDate.toLocaleDateString('default', { month: 'long', year: 'numeric' });
 
-        const daysInWeek = ['S','M','T','W','T','F','S'];
-        daysInWeek.forEach(d => grid.innerHTML += `<div class="calendar-day-name">${d}</div>`);
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => grid.innerHTML += `<div class="calendar-day-name">${d}</div>`);
 
         const firstDayIndex = new Date(year, month, 1).getDay();
         const totalDays = new Date(year, month + 1, 0).getDate();
@@ -597,43 +744,41 @@
             grid.innerHTML += `<div class="calendar-day empty"></div>`;
         }
 
-        db.transaction(["history", "goals"], "readonly").objectStore("history").getAll().onsuccess = (event) => {
+        db.transaction("history", "readonly").objectStore("history").getAll().onsuccess = (event) => {
             const historyList = event.target.result;
             const logs = historyList.reduce((acc, current) => {
-                acc[current.dateStr] = current.completedIds || []; 
+                acc[current.dateStr] = current.statuses || {}; 
                 return acc;
             }, {});
 
-            db.transaction("goals", "readonly").objectStore("goals").getAll().onsuccess = (gEvent) => {
-                const totalActiveGoalsCount = gEvent.target.result.length;
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
 
-                const today = new Date();
-                const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-
-                for(let day=1; day<=totalDays; day++) {
-                    const dateStr = `${year}-${month}-${day}`;
-                    let statusClass = '';
-                    
-                    if (logs[dateStr] && logs[dateStr].length > 0) {
-                        if (totalActiveGoalsCount > 0 && logs[dateStr].length >= totalActiveGoalsCount) {
+            for(let day=1; day<=totalDays; day++) {
+                const dateStr = `${year}-${month}-${day}`;
+                let statusClass = '';
+                
+                if (logs[dateStr]) {
+                    let values = Object.values(logs[dateStr]);
+                    if (values.length > 0) {
+                        if (values.includes('failed')) {
+                            statusClass = 'day-any-fail';
+                        } else if (values.includes('success') && !values.includes('pending')) {
                             statusClass = 'day-all-success';
-                        } else {
-                            statusClass = 'day-some-success';
+                        } else if (values.includes('success')) {
+                            statusClass = 'day-mixed-status';
                         }
-                    } else if (logs[dateStr] !== undefined) {
-                        statusClass = 'day-all-fail';
                     }
-
-                    const isToday = todayStr === dateStr ? 'today' : '';
-                    
-                    grid.innerHTML += `
-                        <div class="calendar-day ${statusClass} ${isToday}" onclick="openDayLog('${dateStr}', ${day})">
-                            ${day}
-                            ${isToday ? '<div class="day-dot"></div>': ''}
-                        </div>
-                    `;
                 }
-            };
+
+                const isToday = todayStr === dateStr ? 'today' : '';
+                grid.innerHTML += `
+                    <div class="calendar-day ${statusClass} ${isToday}" onclick="openDayLog('${dateStr}', ${day})">
+                        ${day}
+                        ${isToday ? '<div class="day-dot"></div>': ''}
+                    </div>
+                `;
+            }
         };
     }
 
@@ -646,26 +791,28 @@
 
         db.transaction(["history", "goals"], "readonly").objectStore("history").get(dateStr).onsuccess = (e) => {
             const logEntry = e.target.result;
-            const completedIds = logEntry ? (logEntry.completedIds || []) : [];
+            const savedStatuses = logEntry ? (logEntry.statuses || {}) : {};
 
             db.transaction("goals", "readonly").objectStore("goals").getAll().onsuccess = (ge) => {
                 const activeGoals = ge.target.result;
                 
                 if (activeGoals.length === 0) {
-                    container.innerHTML = `<p style="color:var(--muted); text-align:center;">No active goals created to log for this day.</p>`;
+                    container.innerHTML = `<p style="color:var(--muted); text-align:center;">No active items found.</p>`;
                     document.getElementById('logModal').style.display = 'flex';
                     return;
                 }
 
                 activeGoals.forEach(goal => {
-                    const isChecked = completedIds.includes(goal.id);
+                    const currentStatus = savedStatuses[goal.id] || "pending";
                     const row = document.createElement('div');
                     row.className = "habit-log-row";
                     row.innerHTML = `
-                        <div><strong style="color: #fff;">${goal.title}</strong></div>
-                        <button class="habit-toggle-btn ${isChecked ? 'done' : ''}" id="toggle-${goal.id}" onclick="toggleHabitLog(${goal.id})">
-                            ${isChecked ? '✓ Completed' : '○ Mark Done'}
-                        </button>
+                        <div style="margin-bottom:6px;"><strong style="color: var(--text-heading);">🎀 ${goal.title}</strong></div>
+                        <div class="state-selector">
+                            <button class="state-btn ${currentStatus === 'pending' ? 'active-pending' : ''}" onclick="setHabitState(${goal.id}, 'pending')">Wait</button>
+                            <button class="state-btn ${currentStatus === 'success' ? 'active-success' : ''}" onclick="setHabitState(${goal.id}, 'success')">💕 Success</button>
+                            <button class="state-btn ${currentStatus === 'failed' ? 'active-failed' : ''}" onclick="setHabitState(${goal.id}, 'failed')">❌ Missed</button>
+                        </div>
                     `;
                     container.appendChild(row);
                 });
@@ -675,64 +822,23 @@
         };
     }
 
-    function toggleHabitLog(goalId) {
-        const btn = document.getElementById(`toggle-${goalId}`);
-        const changingToChecked = !btn.classList.contains('done');
-
-        let tx = db.transaction(["history", "goals", "rewards"], "readwrite");
+    function setHabitState(goalId, newState) {
+        let tx = db.transaction("history", "readwrite");
         let historyStore = tx.objectStore("history");
-        let goalStore = tx.objectStore("goals");
-        let rewardStore = tx.objectStore("rewards");
 
         historyStore.get(selectedLogDateStr).onsuccess = (e) => {
-            let log = e.target.result || { dateStr: selectedLogDateStr, completedIds: [] };
+            let log = e.target.result || { dateStr: selectedLogDateStr, statuses: {} };
+            if(!log.statuses) log.statuses = {};
             
-            if (changingToChecked) {
-                if (!log.completedIds.includes(goalId)) log.completedIds.push(goalId);
-                btn.classList.add('done');
-                btn.innerText = '✓ Completed';
-                
-                goalStore.get(goalId).onsuccess = (ge) => {
-                    let goal = ge.target.result;
-                    if (goal) {
-                        goal.streak += 1;
-                        if (goal.streak >= goal.days) {
-                            triggerCelebration(goal);
-                            if (goal.rewardId) {
-                                rewardStore.get(goal.rewardId).onsuccess = (re) => {
-                                    let rew = re.target.result;
-                                    if(rew) {
-                                        rew.status = 'unlocked';
-                                        rewardStore.put(rew);
-                                    }
-                                };
-                            }
-                            goalStore.delete(goalId);
-                            btn.parentElement.style.opacity = '0.3';
-                            btn.disabled = true;
-                        } else {
-                            goalStore.put(goal);
-                        }
-                    }
-                };
-            } else {
-                log.completedIds = log.completedIds.filter(id => id !== goalId);
-                btn.classList.remove('done');
-                btn.innerText = '○ Mark Done';
-                
-                goalStore.get(goalId).onsuccess = (ge) => {
-                    let goal = ge.target.result;
-                    if (goal && goal.streak > 0) {
-                        goal.streak -= 1;
-                        goalStore.put(goal);
-                    }
-                };
-            }
-            historyStore.put(log);
+            log.statuses[goalId] = newState;
+            
+            historyStore.put(log).onsuccess = () => {
+                openDayLog(selectedLogDateStr, selectedLogDateStr.split('-')[2]);
+            };
         };
     }
 
-    // --- CELEBRATION MODAL & CANVAS SPARKS ENGINE ---
+    // --- CELEBRATION MODAL & PINK CANDY SPARKS ---
     function triggerCelebration(goal) {
         document.getElementById('celebrationGoalText').innerText = `"${goal.title}"`;
         const rewardBox = document.getElementById('celebrationRewardBox');
@@ -741,14 +847,13 @@
             db.transaction("rewards", "readonly").objectStore("rewards").get(goal.rewardId).onsuccess = (e) => {
                 const r = e.target.result;
                 rewardBox.style.display = 'block';
-                rewardBox.innerHTML = r ? `🎁 UNLOCKED: <strong>${r.name}</strong>` : `🎁 Reward item retrieved!`;
+                rewardBox.innerHTML = r ? `👑 PRINCESS AWARD: <strong>${r.name}</strong>` : `🎁 Gift Box Unlocked!`;
             };
         } else {
             rewardBox.style.display = 'none';
         }
 
         document.getElementById('celebrationModal').style.display = 'flex';
-        isCelebrating = true;
         for(let i=0; i<4; i++) {
             setTimeout(() => spawnFireworkCluster(Math.random() * canvas.width, canvas.height * 0.4), i*300);
         }
@@ -758,7 +863,6 @@
     const ctx = canvas.getContext('2d');
     let particles = [];
     let ambientStars = [];
-    let isCelebrating = false;
 
     function setupCanvasSize() {
         canvas.width = window.innerWidth;
@@ -767,27 +871,26 @@
 
     function initAmbientSparkles() {
         ambientStars = [];
-        const count = Math.floor((canvas.width * canvas.height) / 9000); 
+        const count = Math.floor((canvas.width * canvas.height) / 8000); 
         for(let i=0; i<count; i++) {
             ambientStars.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                size: Math.random() * 2 + 0.5,
+                size: Math.random() * 2.5 + 0.5,
                 alpha: Math.random(),
                 speed: Math.random() * 0.01 + 0.005,
-                color: Math.random() > 0.4 ? '#e1d5ff' : '#ffffff'
+                color: Math.random() > 0.5 ? '#ffb3d1' : '#fff9fc'
             });
         }
-        // Start engine loop
         requestAnimationFrame(updateAndRenderCanvasEngine);
     }
 
     function spawnFireworkCluster(x, y) {
-        const colors = ['#e040fb', '#b388ff', '#ea80fc', '#ffd54f', '#ffffff', '#f48fb1'];
+        const colors = ['#ff60a8', '#b382ec', '#fca1c1', '#ffa726', '#ffffff', '#ffccd5'];
         const baseColor = colors[Math.floor(Math.random() * colors.length)];
         for (let i = 0; i < 50; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 6 + 2;
+            const speed = Math.random() * 5 + 2;
             particles.push({
                 x: x, y: y,
                 vx: Math.cos(angle) * speed,
@@ -802,28 +905,23 @@
     function updateAndRenderCanvasEngine() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Draw Ambient Sparkling Sky
         ambientStars.forEach(s => {
             s.alpha += s.speed;
             if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
-            
             ctx.save();
             ctx.globalAlpha = Math.max(0, s.alpha);
             ctx.fillStyle = s.color;
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = s.color;
             ctx.beginPath();
             ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         });
 
-        // 2. Draw Active Celebration Fireworks
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.05; // soft gravity
+            p.vy += 0.04;
             p.alpha -= p.decay;
 
             if (p.alpha <= 0) {
@@ -832,8 +930,6 @@
                 ctx.save();
                 ctx.globalAlpha = p.alpha;
                 ctx.fillStyle = p.color;
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = p.color;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
                 ctx.fill();
@@ -841,8 +937,7 @@
             }
         }
 
-        // Random bonus pop while modal remains up
-        if (document.getElementById('celebrationModal').style.display === 'flex' && Math.random() < 0.02) {
+        if (document.getElementById('celebrationModal').style.display === 'flex' && Math.random() < 0.03) {
             spawnFireworkCluster(Math.random() * canvas.width, Math.random() * canvas.height * 0.6);
         }
 
