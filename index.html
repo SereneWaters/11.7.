@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dreamy Habit RPG Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRlcl9uYW1lIjogIkhhYml0U2hjb3JlIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxMDA4MmIiLAogICJ0aGVtZV9jb2xvciI6ICIjZDZiY2ZmIgp9">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRlcl9uYW1lIjogIkhhYml0IFNoY29yZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMTAwODJiIiwKICAidGhlbWVfY29sb3IiOiAiI2Q2YmNmZiIKfQ==">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
@@ -195,10 +195,11 @@
         .state-btn.active-success { background: linear-gradient(135deg, #57b65b, #81c784); color: #fff; border-color: #81c784; box-shadow: 0 0 8px rgba(76,175,80,0.3); }
         .state-btn.active-failed { background: linear-gradient(135deg, #e65252, #ff7171); color: #fff; border-color: #ff8a80; box-shadow: 0 0 8px rgba(239,68,68,0.3); }
 
-        /* Calendar Styling */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        /* Calendar Styling Updates */
+        .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
         .calendar-header button { width: auto; padding: 6px 14px; background: rgba(0,0,0,0.04); border: 1px solid var(--card-border); box-shadow: none; color: var(--text); }
         [data-theme="dark"] .calendar-header button { background: rgba(255,255,255,0.08); }
+        #calendarMonthYear { flex: 1; text-align: center; margin: 0; }
         
         .calendar-grid {
             display: grid;
@@ -287,7 +288,7 @@
 
     <!-- GOALS SECTION -->
     <div class="section">
-        <h2>👑 Active Princess Goals</h2>
+        <h2>Goals</h2>
         <div id="goalsContainer"></div>
         <button onclick="openGoalModal()">💕 Create New Goal</button>
     </div>
@@ -296,7 +297,7 @@
     <div class="section">
         <div class="calendar-header">
             <button onclick="changeMonth(-1)">🌸 Prev</button>
-            <h3 id="calendarMonthYear" style="margin:0;">Month Year</h3>
+            <h3 id="calendarMonthYear">Month Year</h3>
             <button onclick="changeMonth(1)">Next 🌸</button>
         </div>
         <div class="calendar-grid" id="calendarGrid"></div>
@@ -304,13 +305,13 @@
 
     <!-- UNLOCKED REWARDS -->
     <div class="section" style="border: 1px solid rgba(255, 139, 187, 0.4); background: rgba(255, 139, 187, 0.04);">
-        <h2>🎁 Claimable Royal Treats</h2>
+        <h2>Claimable</h2>
         <div id="unlockedContainer"></div>
     </div>
 
     <!-- REWARD VAULT -->
     <div class="section">
-        <h2>💎 Reward Treasury Pool</h2>
+        <h2>Rewards</h2>
         <div id="rewardsContainer"></div>
         <button onclick="openRewardModal()">⭐ Create New Reward Item</button>
     </div>
@@ -384,7 +385,6 @@
     let currentNavDate = new Date();
     let selectedLogDateStr = "";
 
-    // Set up database connections
     const dbRequest = indexedDB.open("HabitRPGDatabase", 4);
     dbRequest.onupgradeneeded = (e) => {
         let database = e.target.result;
@@ -398,7 +398,6 @@
     };
 
     function initApp() {
-        // Load saved theme configuration
         const savedTheme = localStorage.getItem("girly-rpg-theme") || "dark";
         document.body.setAttribute("data-theme", savedTheme);
         document.getElementById("themeToggle").innerText = savedTheme === "dark" ? "☁️" : "🔮";
@@ -533,7 +532,6 @@
         }
     }
 
-    // Claim rewards processing
     function claimReward(id) {
         let tx = db.transaction("rewards", "readwrite");
         tx.objectStore("rewards").delete(id);
@@ -582,7 +580,7 @@
 
     function openGoalModal() {
         document.getElementById('goalModalTitle').innerText = "Create New Goal";
-        document.getElementById('saveGoalBtn').innerText = "Create Goal 💕";
+        document.getElementById('saveGoalBtn').innerText = "Create Goal";
         document.getElementById('editGoalId').value = "";
         document.getElementById('goalTitle').value = "";
         document.getElementById('goalDays').value = "7";
@@ -595,7 +593,7 @@
             const g = e.target.result;
             if (!g) return;
             document.getElementById('goalModalTitle').innerText = "Edit Active Goal";
-            document.getElementById('saveGoalBtn').innerText = "Update Goal ✨";
+            document.getElementById('saveGoalBtn').innerText = "Update Goal";
             document.getElementById('editGoalId').value = g.id;
             document.getElementById('goalTitle').value = g.title;
             document.getElementById('goalDays').value = g.days;
@@ -838,7 +836,7 @@
         };
     }
 
-    // --- CELEBRATION MODAL & PINK CANDY SPARKS ---
+    // --- CELEBRATION MODAL ---
     function triggerCelebration(goal) {
         document.getElementById('celebrationGoalText').innerText = `"${goal.title}"`;
         const rewardBox = document.getElementById('celebrationRewardBox');
