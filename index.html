@@ -7,7 +7,7 @@
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRlcl9uYW1lIjogIkhhYml0IFNoY29yZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMTAwODJiIiwKICAidGhlbWVfY29sb3IiOiAiI2Q2YmNmZiIKfQ==">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             /* Default Dark Mode Theme */
@@ -64,7 +64,19 @@
             min-height: 100vh;
             transition: background 0.3s ease, color 0.3s ease;
         }
-        h1, h2, h3 { 
+        
+        /* Distinctive Standout Heading Font */
+        h2 {
+            font-family: 'Comfortaa', 'Quicksand', cursive, sans-serif;
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 14px;
+            color: var(--text-heading);
+            text-shadow: var(--heading-shadow);
+            letter-spacing: 1px;
+        }
+
+        h1, h3 { 
             margin-top: 0; 
             color: var(--text-heading); 
             text-shadow: var(--heading-shadow);
@@ -117,14 +129,14 @@
         button:active { transform: scale(0.97); }
         button.secondary { background: rgba(0, 0, 0, 0.05); border: 1px solid var(--card-border); margin-top: 4px; box-shadow: none; color: var(--text); }
         [data-theme="dark"] button.secondary { background: rgba(255, 255, 255, 0.08); }
-        button.action-btn { width: auto; padding: 6px 14px; font-size: 0.8rem; font-weight: 600; margin-left: 4px; box-shadow: none; border-radius: 8px; }
+        button.action-btn { width: auto; padding: 4px 10px; font-size: 0.75rem; font-weight: 600; margin-left: 2px; box-shadow: none; border-radius: 6px; }
         button.edit-btn { background: rgba(0,0,0,0.06); color: var(--text); border: 1px solid var(--card-border); }
         [data-theme="dark"] button.edit-btn { background: rgba(255,255,255,0.15); }
         button.danger-btn { background: linear-gradient(135deg, #ff7676, #f44336); }
-        button.claim-btn { background: linear-gradient(135deg, #ff71b2, #ec407a); width: auto; padding: 8px 18px; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(236,64,122,0.3); }
+        button.claim-btn { background: linear-gradient(135deg, #ff71b2, #ec407a); width: auto; padding: 6px 14px; font-size: 0.85rem; box-shadow: 0 4px 10px rgba(236,64,122,0.3); }
 
         .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .button-group { display: flex; gap: 6px; }
+        .button-group { display: flex; gap: 4px; align-items: center; }
 
         .item-card {
             background: rgba(255, 255, 255, 0.25);
@@ -136,18 +148,45 @@
         }
         [data-theme="dark"] .item-card { background: rgba(255, 255, 255, 0.03); }
         
+        /* Ultra-Compact Clean Goal Design */
         .goal-card { 
-            border-left: 5px solid var(--primary); 
-            box-shadow: inset 5px 0 10px -5px var(--primary-glow);
+            border-left: 4px solid var(--primary); 
+            box-shadow: inset 4px 0 8px -4px var(--primary-glow);
+            padding: 8px 10px;
+            margin-top: 6px;
+            gap: 6px;
         }
+        .goal-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0; 
+            flex: 1;
+        }
+        .goal-title-text {
+            font-size: 0.95rem; 
+            color: var(--text-heading);
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .goal-reward-text {
+            font-size: 0.75rem; 
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
         .reward-tag {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 20px;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             font-weight: bold;
             color: #fff;
-            margin-top: 6px;
+            margin-top: 4px;
             letter-spacing: 0.5px;
         }
         .priority-low { background-color: #8cb6f6; }
@@ -155,11 +194,11 @@
         .priority-high { background-color: #fca1c1; }
         
         .streak-badge {
-            background: rgba(241, 139, 187, 0.15);
+            background: rgba(241, 139, 187, 0.12);
             border: 1px solid var(--primary-glow);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.78rem;
             font-weight: 700;
             color: var(--text-heading);
             white-space: nowrap;
@@ -195,7 +234,7 @@
         .state-btn.active-success { background: linear-gradient(135deg, #57b65b, #81c784); color: #fff; border-color: #81c784; box-shadow: 0 0 8px rgba(76,175,80,0.3); }
         .state-btn.active-failed { background: linear-gradient(135deg, #e65252, #ff7171); color: #fff; border-color: #ff8a80; box-shadow: 0 0 8px rgba(239,68,68,0.3); }
 
-        /* Calendar Styling Updates */
+        /* Calendar Styling */
         .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
         .calendar-header button { width: auto; padding: 6px 14px; background: rgba(0,0,0,0.04); border: 1px solid var(--card-border); box-shadow: none; color: var(--text); }
         [data-theme="dark"] .calendar-header button { background: rgba(255,255,255,0.08); }
@@ -289,7 +328,7 @@
     <!-- GOALS SECTION -->
     <div class="section">
         <h2>Goals</h2>
-        <div id="goalsContainer"></div>
+        <div id="goalsContainer" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;"></div>
         <button onclick="openGoalModal()">💕 Create New Goal</button>
     </div>
 
@@ -609,7 +648,7 @@
         db.transaction(["goals", "rewards"], "readonly").objectStore("goals").getAll().onsuccess = (e) => {
             const goals = e.target.result;
             if(goals.length === 0) {
-                container.innerHTML = `<p style="color:var(--muted); text-align:center;">No goals tracked yet. Add one below! 🎀</p>`;
+                container.innerHTML = `<p style="color:var(--muted); text-align:center; margin: 6px 0;">No goals tracked yet. Add one below! 🎀</p>`;
                 return;
             }
             
@@ -617,27 +656,25 @@
                 const card = document.createElement('div');
                 card.className = "item-card goal-card flex-between";
                 
-                let rewardHtml = `<span style="font-size:0.8rem; color:var(--muted);">No Gift linked</span>`;
+                let rewardHtml = `<span class="goal-reward-text">No Gift linked</span>`;
                 if(g.rewardId) {
                     db.transaction("rewards", "readonly").objectStore("rewards").get(g.rewardId).onsuccess = (re) => {
                         if(re.target.result) {
                             document.getElementById(`rew-${g.id}`).innerHTML = `🎁 Reward: <strong>${re.target.result.name}</strong>`;
                         }
                     };
-                    rewardHtml = `<span id="rew-${g.id}" style="font-size:0.8rem; color:var(--muted);">Loading gift...</span>`;
+                    rewardHtml = `<span id="rew-${g.id}" class="goal-reward-text">Loading gift...</span>`;
                 }
 
                 card.innerHTML = `
-                    <div>
-                        <strong style="font-size:1.1rem; color:var(--text-heading);">🎀 ${g.title}</strong><br>
+                    <div class="goal-details">
+                        <div class="goal-title-text" title="${g.title}">🎀 ${g.title}</div>
                         ${rewardHtml}
                     </div>
-                    <div class="flex-between">
-                        <span class="streak-badge">⭐ ${g.streak} / ${g.days} Days</span>
-                        <div class="button-group">
-                            <button class="action-btn edit-btn" onclick="openEditGoal(${g.id})">Edit</button>
-                            <button class="action-btn danger-btn" onclick="deleteGoal(${g.id})">X</button>
-                        </div>
+                    <div class="button-group">
+                        <span class="streak-badge">⭐ ${g.streak}/${g.days} D</span>
+                        <button class="action-btn edit-btn" onclick="openEditGoal(${g.id})">Edit</button>
+                        <button class="action-btn danger-btn" onclick="deleteGoal(${g.id})">X</button>
                     </div>
                 `;
                 container.appendChild(card);
