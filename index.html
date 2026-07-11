@@ -3,68 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habit RPG Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRfbmFtZSI6ICJIYWJpdFNoY29yZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3IiOiAiIzYzNjZmMSIKfQ==">
+    <title>Dreamy Habit RPG Tracker</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFJQRyBUcmFja2VyIiwKICAic2hvcnRfbmFtZSI6ICJIYWJpdFNoY29yZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMTAwODJiIiwKICAidGhlbWVfY29sb3IiOiAiI2Q2YmNmZiIKfQ==">
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --primary: #6366f1;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --low: #3b82f6;
-            --medium: #f59e0b;
-            --high: #ef4444;
+            --bg: linear-gradient(135deg, #0e0720 0%, #1c0f3a 40%, #3a1c5d 75%, #5d327c 100%);
+            --card: rgba(255, 255, 255, 0.06);
+            --card-border: rgba(220, 180, 255, 0.15);
+            --text: #f1e9ff;
+            --muted: #bda6e0;
+            --primary: #b388ff;
+            --primary-glow: rgba(179, 136, 255, 0.4);
+            --success: #81c784;
+            --danger: #ff8a80;
+            --warning: #ffd54f;
+            --low: #90caf9;
+            --medium: #ce93d8;
+            --high: #f48fb1;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
+            background: var(--bg);
+            background-attachment: fixed;
             color: var(--text);
             margin: 0;
             padding: 12px;
             padding-bottom: 60px;
+            min-height: 100vh;
         }
-        h1, h2, h3 { margin-top: 0; color: #fff; }
+        h1, h2, h3 { 
+            margin-top: 0; 
+            color: #ffffff; 
+            text-shadow: 0 0 10px rgba(220, 180, 255, 0.6), 0 0 20px rgba(179, 136, 255, 0.3);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
         .section {
             background: var(--card);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 32px 0 rgba(14, 7, 32, 0.3);
         }
-        .status-bar { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 12px; }
+        .status-bar { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 12px; opacity: 0.8; }
         
         /* Form Controls */
         input, select, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 11px;
             margin: 6px 0 14px 0;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 6px;
+            background: rgba(14, 7, 32, 0.4);
+            border: 1px solid rgba(220, 180, 255, 0.25);
+            border-radius: 8px;
             color: white;
             box-sizing: border-box;
             font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
         }
         button {
-            background: var(--primary);
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
             font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(103, 58, 183, 0.3);
+            transition: transform 0.1s, opacity 0.2s;
         }
-        button.secondary { background: #334155; margin-top: 4px;}
-        button.action-btn { width: auto; padding: 6px 10px; font-size: 0.8rem; font-weight: normal; margin-left: 4px; }
-        button.edit-btn { background: #475569; }
-        button.danger-btn { background: var(--danger); }
-        button.claim-btn { background: var(--success); width: auto; padding: 8px 14px; font-size: 0.9rem;}
+        button:active { transform: scale(0.98); }
+        button.secondary { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); margin-top: 4px; box-shadow: none; color: var(--text); }
+        button.action-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; font-weight: normal; margin-left: 4px; box-shadow: none; }
+        button.edit-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); }
+        button.danger-btn { background: linear-gradient(135deg, #e91e63, #f44336); }
+        button.claim-btn { background: linear-gradient(135deg, #4caf50, #009688); width: auto; padding: 8px 16px; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(76,175,80,0.3); }
 
         /* Flex helpers */
         .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -73,105 +95,130 @@
 
         /* Items Lists */
         .item-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(220, 180, 255, 0.1);
+            border-radius: 10px;
+            padding: 14px;
             margin-top: 10px;
             position: relative;
         }
-        .goal-card { border-left: 4px solid var(--primary); }
+        .goal-card { 
+            border-left: 4px solid var(--primary); 
+            box-shadow: inset 5px 0 10px -5px var(--primary-glow);
+        }
         .reward-tag {
             display: inline-block;
             padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
             font-weight: bold;
             color: #fff;
-            margin-top: 4px;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
         }
-        .priority-low { background-color: var(--low); }
-        .priority-medium { background-color: var(--medium); }
-        .priority-high { background-color: var(--high); }
+        .priority-low { background-color: var(--low); box-shadow: 0 0 6px rgba(144,202,249,0.4); }
+        .priority-medium { background-color: var(--medium); box-shadow: 0 0 6px rgba(206,147,216,0.4); }
+        .priority-high { background-color: var(--high); box-shadow: 0 0 6px rgba(244,143,177,0.4); }
         
         .streak-badge {
-            background: #334155;
-            padding: 4px 8px;
+            background: rgba(147, 112, 219, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: bold;
+            color: #e1d5ff;
             white-space: nowrap;
         }
 
         /* Habit Row Inside Logger */
         .habit-log-row {
-            background: #0f172a;
-            border: 1px solid #334155;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
+            background: rgba(14, 7, 32, 0.3);
+            border: 1px solid rgba(220, 180, 255, 0.15);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .habit-toggle-btn {
             width: auto;
-            padding: 8px 16px;
-            background: #334155;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             font-size: 0.9rem;
+            box-shadow: none;
         }
         .habit-toggle-btn.done {
-            background: var(--success);
+            background: linear-gradient(135deg, #7e57c2, #ba68c8);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(186, 104, 200, 0.5);
         }
 
         /* Calendar Styling */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .calendar-header button { width: auto; padding: 6px 12px; background: #334155; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .calendar-header button { width: auto; padding: 6px 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); box-shadow: none; }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 6px;
             text-align: center;
         }
-        .calendar-day-name { font-size: 0.75rem; color: var(--muted); font-weight: bold; padding-bottom: 4px; }
+        .calendar-day-name { font-size: 0.75rem; color: var(--muted); font-weight: bold; padding-bottom: 6px; }
         .calendar-day {
             aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #0f172a;
-            border-radius: 6px;
+            background: rgba(14, 7, 32, 0.25);
+            border: 1px solid rgba(220, 180, 255, 0.05);
+            border-radius: 8px;
             font-size: 0.85rem;
             cursor: pointer;
-            border: 1px solid transparent;
             position: relative;
+            transition: background-color 0.2s, border-color 0.2s;
         }
-        .calendar-day.today { border: 2px solid var(--primary); }
-        .calendar-day.empty { background: transparent; cursor: default; }
+        .calendar-day:hover { background: rgba(255, 255, 255, 0.05); }
+        .calendar-day.today { border: 2px solid var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+        .calendar-day.empty { background: transparent; border: none; cursor: default; }
+        .calendar-day.empty:hover { background: transparent; }
         
-        /* Dynamic Calendar Status Shades */
-        .day-all-success { background-color: rgba(34, 197, 94, 0.25); border: 1px solid var(--success); }
-        .day-some-success { background-color: rgba(245, 158, 11, 0.2); border: 1px solid var(--warning); }
-        .day-all-fail { background-color: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); }
-        .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 2px; }
+        /* Dynamic Calendar Status Shades (Sparkly Dreamy Palettes) */
+        .day-all-success { background-color: rgba(186, 104, 200, 0.35); border: 1px solid rgba(244, 143, 177, 0.6); box-shadow: inset 0 0 8px rgba(186, 104, 200, 0.4); }
+        .day-some-success { background-color: rgba(103, 58, 183, 0.25); border: 1px solid rgba(179, 136, 255, 0.4); }
+        .day-all-fail { background-color: rgba(239, 68, 68, 0.15); border: 1px solid rgba(255, 138, 128, 0.3); }
+        .day-dot { width: 5px; height: 5px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px #ffffff; margin-top: 3px; }
 
         /* Modal / Overlay for logging */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(10, 4, 24, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 100;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+        .modal-content { 
+            background: rgba(30, 18, 54, 0.9); 
+            border: 1px solid rgba(220, 180, 255, 0.25);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            padding: 22px; 
+            border-radius: 16px; 
+            width: 100%; 
+            max-width: 400px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+        }
 
         /* Celebration Screen Layout */
-        .victory-title { font-size: 2rem; color: #f59e0b; text-align: center; margin-bottom: 10px; }
-        .victory-reward { font-size: 1.2rem; background: rgba(99,102,241,0.2); padding: 12px; border-radius: 8px; text-align: center; border: 1px dashed var(--primary); margin: 15px 0; }
+        .victory-title { font-size: 2rem; color: #ffd54f; text-shadow: 0 0 15px rgba(255,213,79,0.6); text-align: center; margin-bottom: 10px; }
+        .victory-reward { font-size: 1.2rem; background: rgba(179,136,255,0.15); padding: 14px; border-radius: 10px; text-align: center; border: 1px dashed var(--primary); margin: 15px 0; color: #fff; }
         canvas#celebrationCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
     </style>
 </head>
@@ -198,7 +245,7 @@
     </div>
 
     <!-- 3. UNLOCKED REWARDS (SHOPPING LIST) -->
-    <div class="section" style="border: 2px solid var(--success);">
+    <div class="section" style="border: 1px solid rgba(129, 199, 132, 0.4); background: rgba(129, 199, 132, 0.03);">
         <h2>🎁 Unlocked Rewards (Ready to Claim)</h2>
         <div id="unlockedContainer"></div>
     </div>
@@ -242,8 +289,8 @@
             <label>Priority Color Focus</label>
             <select id="rewardPriority">
                 <option value="low">Low Priority (Blue)</option>
-                <option value="medium" selected>Medium Priority (Orange)</option>
-                <option value="high">High Priority (Red)</option>
+                <option value="medium" selected>Medium Priority (Purple)</option>
+                <option value="high">High Priority (Pink)</option>
             </select>
             
             <button id="saveRewardBtn" onclick="saveReward()">Save to Pool</button>
@@ -263,12 +310,12 @@
 
     <!-- MODAL: CELEBRATION POPUP -->
     <div class="modal" id="celebrationModal" style="z-index: 1000;">
-        <div class="modal-content" style="text-align: center; border: 2px solid #f59e0b;">
+        <div class="modal-content" style="text-align: center; border: 1px solid #ffd54f;">
             <div class="victory-title">🎉 GOAL ACHIEVED! 🎉</div>
             <p id="celebrationGoalText" style="font-size: 1.1rem; font-weight: bold; margin: 10px 0;"></p>
             <div id="celebrationRewardBox" class="victory-reward"></div>
             <p style="color: var(--muted); font-size: 0.9rem;">Your reward has been added to your Unlocked Rewards list!</p>
-            <button onclick="closeModal('celebrationModal')" style="background: var(--success); margin-top: 10px;">Awesome!</button>
+            <button onclick="closeModal('celebrationModal')" style="background: linear-gradient(135deg, #4caf50, #009688); margin-top: 10px;">Awesome!</button>
         </div>
     </div>
 
@@ -293,11 +340,12 @@
     function initApp() {
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(granted => {
-                document.getElementById('storageLock').innerText = granted ? "🔒 Permanent Storage Engaged" : "⚠️ Device Storage Management Active";
+                document.getElementById('storageLock').innerText = granted ? "🔮 Permanent Arcane Storage Engaged" : "⚠️ Memory Management Engaged";
             });
         }
         setupCanvasSize();
         window.addEventListener('resize', setupCanvasSize);
+        initAmbientSparkles();
         renderAll();
     }
 
@@ -499,7 +547,7 @@
 
                 card.innerHTML = `
                     <div style="overflow: hidden; text-overflow: ellipsis;">
-                        <strong style="font-size:1.1rem;">${g.title}</strong><br>
+                        <strong style="font-size:1.1rem; color:#fff;">${g.title}</strong><br>
                         ${rewardHtml}
                     </div>
                     <div class="flex-between" style="flex-shrink: 0;">
@@ -549,7 +597,6 @@
             grid.innerHTML += `<div class="calendar-day empty"></div>`;
         }
 
-        // Get both history logs and goals to calculate dynamic day coloring shades
         db.transaction(["history", "goals"], "readonly").objectStore("history").getAll().onsuccess = (event) => {
             const historyList = event.target.result;
             const logs = historyList.reduce((acc, current) => {
@@ -568,7 +615,6 @@
                     let statusClass = '';
                     
                     if (logs[dateStr] && logs[dateStr].length > 0) {
-                        // If everything active or more was checked, give it full success colors
                         if (totalActiveGoalsCount > 0 && logs[dateStr].length >= totalActiveGoalsCount) {
                             statusClass = 'day-all-success';
                         } else {
@@ -616,7 +662,7 @@
                     const row = document.createElement('div');
                     row.className = "habit-log-row";
                     row.innerHTML = `
-                        <div><strong>${goal.title}</strong></div>
+                        <div><strong style="color: #fff;">${goal.title}</strong></div>
                         <button class="habit-toggle-btn ${isChecked ? 'done' : ''}" id="toggle-${goal.id}" onclick="toggleHabitLog(${goal.id})">
                             ${isChecked ? '✓ Completed' : '○ Mark Done'}
                         </button>
@@ -646,7 +692,6 @@
                 btn.classList.add('done');
                 btn.innerText = '✓ Completed';
                 
-                // Advance specific habit streak
                 goalStore.get(goalId).onsuccess = (ge) => {
                     let goal = ge.target.result;
                     if (goal) {
@@ -663,8 +708,7 @@
                                 };
                             }
                             goalStore.delete(goalId);
-                            // Remove from local list row view instantly
-                            btn.parentElement.style.opacity = '0.4';
+                            btn.parentElement.style.opacity = '0.3';
                             btn.disabled = true;
                         } else {
                             goalStore.put(goal);
@@ -676,7 +720,6 @@
                 btn.classList.remove('done');
                 btn.innerText = '○ Mark Done';
                 
-                // Revert specific habit streak
                 goalStore.get(goalId).onsuccess = (ge) => {
                     let goal = ge.target.result;
                     if (goal && goal.streak > 0) {
@@ -689,7 +732,7 @@
         };
     }
 
-    // --- CELEBRATION MODAL & CANVAS ANIMATION ---
+    // --- CELEBRATION MODAL & CANVAS SPARKS ENGINE ---
     function triggerCelebration(goal) {
         document.getElementById('celebrationGoalText').innerText = `"${goal.title}"`;
         const rewardBox = document.getElementById('celebrationRewardBox');
@@ -705,59 +748,82 @@
         }
 
         document.getElementById('celebrationModal').style.display = 'flex';
-        startFireworks();
+        isCelebrating = true;
+        for(let i=0; i<4; i++) {
+            setTimeout(() => spawnFireworkCluster(Math.random() * canvas.width, canvas.height * 0.4), i*300);
+        }
     }
 
-    // Pure Canvas Firework Engine
     const canvas = document.getElementById('celebrationCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
+    let ambientStars = [];
+    let isCelebrating = false;
 
     function setupCanvasSize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     }
 
-    function startFireworks() {
-        particles = [];
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => {
-                spawnFireworkCluster(Math.random() * canvas.width, canvas.height * 0.3 + Math.random() * (canvas.height * 0.4));
-            }, i * 350);
+    function initAmbientSparkles() {
+        ambientStars = [];
+        const count = Math.floor((canvas.width * canvas.height) / 9000); 
+        for(let i=0; i<count; i++) {
+            ambientStars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 0.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.01 + 0.005,
+                color: Math.random() > 0.4 ? '#e1d5ff' : '#ffffff'
+            });
         }
-        requestAnimationFrame(animateFireworks);
+        // Start engine loop
+        requestAnimationFrame(updateAndRenderCanvasEngine);
     }
 
     function spawnFireworkCluster(x, y) {
-        const colors = ['#6366f1', '#22c55e', '#ef4444', '#f59e0b', '#3b82f6', '#ec4899', '#a855f7'];
+        const colors = ['#e040fb', '#b388ff', '#ea80fc', '#ffd54f', '#ffffff', '#f48fb1'];
         const baseColor = colors[Math.floor(Math.random() * colors.length)];
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < 50; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 5 + 2;
+            const speed = Math.random() * 6 + 2;
             particles.push({
                 x: x, y: y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 alpha: 1,
                 decay: Math.random() * 0.015 + 0.01,
-                color: baseColor
+                color: Math.random() > 0.3 ? baseColor : colors[Math.floor(Math.random()*colors.length)]
             });
         }
     }
 
-    function animateFireworks() {
-        if (document.getElementById('celebrationModal').style.display === 'none' && particles.length === 0) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            return;
-        }
-
+    function updateAndRenderCanvasEngine() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // 1. Draw Ambient Sparkling Sky
+        ambientStars.forEach(s => {
+            s.alpha += s.speed;
+            if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+            
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, s.alpha);
+            ctx.fillStyle = s.color;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = s.color;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // 2. Draw Active Celebration Fireworks
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.06;
+            p.vy += 0.05; // soft gravity
             p.alpha -= p.decay;
 
             if (p.alpha <= 0) {
@@ -766,19 +832,21 @@
                 ctx.save();
                 ctx.globalAlpha = p.alpha;
                 ctx.fillStyle = p.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = p.color;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             }
         }
 
-        if (document.getElementById('celebrationModal').style.display === 'flex' || particles.length > 0) {
-            if(document.getElementById('celebrationModal').style.display === 'flex' && Math.random() < 0.1) {
-                spawnFireworkCluster(Math.random() * canvas.width, Math.random() * canvas.height * 0.7);
-            }
-            requestAnimationFrame(animateFireworks);
+        // Random bonus pop while modal remains up
+        if (document.getElementById('celebrationModal').style.display === 'flex' && Math.random() < 0.02) {
+            spawnFireworkCluster(Math.random() * canvas.width, Math.random() * canvas.height * 0.6);
         }
+
+        requestAnimationFrame(updateAndRenderCanvasEngine);
     }
 </script>
 </body>
